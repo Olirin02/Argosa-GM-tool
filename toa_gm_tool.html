@@ -1,0 +1,1328 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Tales of Argosa — Table GM</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=EB+Garamond:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#1a0e05;--bg2:#221508;--bg3:#2e1a08;
+  --parch:#f4ead5;--parch2:#e8d9b8;--parch3:#dbc89e;
+  --ink:#1a1208;--red:#8b1a1a;--red2:#5a0f0f;--red3:#c0392b;
+  --gold:#b8860b;--gold2:#d4a017;--gold3:#f0c040;
+  --br:#8b6914;--sh:rgba(26,18,8,.3);
+  --tab-h:48px;
+  --panel-bg:rgba(244,234,213,.04);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);font-family:'EB Garamond',Georgia,serif;color:var(--ink);min-height:100vh;overflow-x:hidden;}
+
+/* Noise texture overlay */
+body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");pointer-events:none;z-index:9999;opacity:.6;}
+
+/* ── TOP BAR ── */
+.topbar{background:linear-gradient(135deg,var(--red2),#3a0808);border-bottom:2px solid var(--gold);padding:.6rem 1.2rem;display:flex;align-items:center;gap:1rem;position:sticky;top:0;z-index:100;}
+.topbar-title{font-family:'Cinzel',serif;font-weight:900;font-size:1.15rem;color:var(--gold2);letter-spacing:.12em;text-transform:uppercase;text-shadow:0 2px 6px rgba(0,0,0,.6);}
+.topbar-sub{font-size:.78rem;color:rgba(212,160,23,.7);font-style:italic;letter-spacing:.04em;}
+.skull{font-size:1.4rem;filter:sepia(1);}
+
+/* ── TABS ── */
+.tabs{display:flex;background:var(--bg2);border-bottom:2px solid var(--gold);overflow:hidden;}
+.tab{flex:1;padding:.7rem .5rem;font-family:'Cinzel',serif;font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:rgba(200,169,110,.55);cursor:pointer;border:none;background:transparent;border-right:1px solid rgba(139,105,20,.25);transition:all .2s;text-align:center;}
+.tab:last-child{border-right:none;}
+.tab:hover{color:var(--gold2);background:rgba(184,134,11,.08);}
+.tab.active{color:var(--gold3);background:linear-gradient(180deg,rgba(184,134,11,.18),rgba(184,134,11,.06));border-bottom:3px solid var(--gold3);margin-bottom:-2px;}
+
+/* ── PANELS ── */
+.panel{display:none;padding:1rem;min-height:calc(100vh - 100px);animation:fadein .25s ease;}
+.panel.active{display:flex;flex-direction:column;gap:1rem;}
+@keyframes fadein{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:none;}}
+
+/* ── TAB 0 — SCÈNE ── */
+.scene-layout{display:grid;grid-template-columns:1fr 1fr;gap:1rem;flex:1;}
+.scene-col{display:flex;flex-direction:column;gap:.7rem;}
+.scene-subtabs{display:flex;align-items:center;gap:.4rem;margin-bottom:.6rem;flex-wrap:wrap;}
+.scene-sbt{background:rgba(244,234,213,.06);border:1px solid rgba(139,105,20,.3);color:rgba(200,169,110,.6);font-family:'Cinzel',serif;font-size:.68rem;font-weight:700;padding:.38rem .9rem;border-radius:3px;cursor:pointer;letter-spacing:.09em;text-transform:uppercase;transition:all .2s;}
+.scene-sbt:hover{color:var(--gold2);background:rgba(184,134,11,.1);}
+.scene-sbt.active{background:linear-gradient(135deg,var(--red),var(--red2));border-color:var(--red);color:var(--gold2);}
+.scene-sbt-spacer{flex:1;}
+.end-combat-btn{background:linear-gradient(135deg,#2a5c1a,#1a3c0a);border:1px solid #4a9c2a;border-radius:3px;color:#a0e070;font-family:'Cinzel',serif;font-size:.7rem;font-weight:700;padding:.4rem 1rem;cursor:pointer;letter-spacing:.09em;text-transform:uppercase;transition:all .2s;}
+.end-combat-btn:hover{background:linear-gradient(135deg,#3a7c22,#2a5c14);border-color:#6cc040;color:#c0f090;}
+.combat-hist-card{background:rgba(244,234,213,.04);border:1px solid rgba(139,105,20,.2);border-radius:4px;padding:.7rem .9rem;margin-bottom:.5rem;}
+.combat-hist-header{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:.5rem;padding-bottom:.35rem;border-bottom:1px solid rgba(139,105,20,.2);}
+.combat-hist-title{font-family:'Cinzel',serif;font-size:.8rem;font-weight:700;color:var(--gold2);}
+.combat-hist-date{font-size:.65rem;color:rgba(200,169,110,.45);font-style:italic;}
+.combat-hist-creatures{display:flex;flex-wrap:wrap;gap:.35rem;margin-top:.4rem;}
+.combat-hist-tag{background:rgba(139,26,26,.2);border:1px solid rgba(139,26,26,.35);border-radius:2px;font-family:'Cinzel',serif;font-size:.62rem;color:#e8a090;padding:.12rem .4rem;}
+.combat-hist-tag.dead{background:rgba(60,60,60,.2);border-color:rgba(100,100,100,.25);color:rgba(150,150,150,.5);}
+.combat-hist-del{background:none;border:1px solid rgba(200,100,100,.2);border-radius:2px;color:rgba(200,100,100,.4);cursor:pointer;font-size:.65rem;padding:.15rem .4rem;transition:all .15s;}
+.combat-hist-del:hover{border-color:#e74c3c;color:#e74c3c;}
+.col-title{font-family:'Cinzel',serif;font-weight:700;font-size:.8rem;text-transform:uppercase;letter-spacing:.15em;color:var(--gold2);padding:.4rem .8rem;background:linear-gradient(135deg,rgba(139,26,26,.4),rgba(90,15,15,.4));border:1px solid rgba(139,105,20,.35);border-radius:3px;}
+
+/* PC cards */
+.pc-card{background:rgba(244,234,213,.05);border:1px solid rgba(139,105,20,.3);border-radius:4px;padding:.7rem .8rem;position:relative;transition:border-color .2s;}
+.pc-card.active-card{border-color:var(--gold);background:rgba(184,134,11,.08);}
+.pc-card-header{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:.5rem;}
+.pc-name{font-family:'Cinzel',serif;font-size:.85rem;font-weight:700;color:var(--parch);}
+.pc-meta{font-size:.7rem;color:rgba(200,169,110,.7);font-style:italic;}
+.pc-stats-row{display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:.4rem;}
+.pc-stat{background:var(--red2);border:1px solid var(--red);border-radius:2px;padding:.18rem .4rem;text-align:center;}
+.pc-stat-label{font-family:'Cinzel',serif;font-size:.48rem;font-weight:700;letter-spacing:.1em;color:var(--gold2);display:block;text-transform:uppercase;}
+.pc-stat-val{font-family:'Cinzel',serif;font-size:.82rem;font-weight:700;color:var(--parch);display:block;line-height:1.1;}
+.pc-stat.big-stat .pc-stat-val{font-size:1.05rem;color:var(--gold3);}
+.pc-attrs{display:flex;gap:.2rem;flex-wrap:nowrap;margin-top:.35rem;overflow:hidden;}
+.pc-attr{background:rgba(244,234,213,.08);border:1px solid rgba(139,105,20,.25);border-radius:2px;padding:.1rem .18rem;text-align:center;flex:1;min-width:0;}
+.pc-attr-n{font-family:'Cinzel',serif;font-size:.42rem;font-weight:700;color:rgba(212,160,23,.8);display:block;letter-spacing:.04em;}
+.pc-attr-v{font-size:.75rem;font-weight:600;color:var(--parch2);display:block;line-height:1.1;}
+.pc-attr-mod{font-family:'Cinzel',serif;font-size:.48rem;font-weight:700;color:var(--gold2);display:block;line-height:1;}
+.pc-attr-roll{cursor:pointer;transition:all .15s;position:relative;}
+.pc-attr-roll:hover{background:rgba(184,134,11,.2);border-color:var(--gold);transform:translateY(-1px);box-shadow:0 3px 8px rgba(0,0,0,.3);}
+.pc-attr-roll:active{transform:translateY(0);}
+.pc-attr-inactive{opacity:.45;}
+.pc-skills{margin-top:.35rem;font-size:.73rem;color:rgba(200,169,110,.8);font-style:italic;border-top:1px dashed rgba(139,105,20,.3);padding-top:.28rem;}
+.pc-skills span{display:inline-block;background:rgba(184,134,11,.12);border:1px solid rgba(139,105,20,.25);border-radius:10px;padding:.08rem .35rem;margin:.08rem .06rem;font-style:normal;font-size:.66rem;color:var(--parch2);}
+.no-pc{text-align:center;padding:2rem;color:rgba(200,169,110,.4);font-style:italic;font-size:.85rem;}
+.no-pc .hint{font-size:.75rem;margin-top:.4rem;opacity:.7;}
+
+/* Combat tracker */
+.combat-tracker{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.3rem;}
+.hp-editor{display:flex;align-items:center;gap:.4rem;margin-top:.4rem;}
+.hp-editor label{font-size:.7rem;color:rgba(200,169,110,.7);font-family:'Cinzel',serif;letter-spacing:.07em;font-size:.6rem;}
+.hp-editor input[type=number]{width:52px;background:rgba(244,234,213,.08);border:1px solid rgba(139,105,20,.4);border-radius:2px;color:var(--parch);font-family:'EB Garamond',serif;font-size:.85rem;padding:.15rem .3rem;text-align:center;outline:none;}
+.hp-bar{flex:1;height:8px;background:rgba(255,255,255,.08);border-radius:4px;overflow:hidden;margin-top:.4rem;}
+.hp-bar-fill{height:100%;background:linear-gradient(90deg,#c0392b,#e74c3c);border-radius:4px;transition:width .3s;}
+.hp-bar-fill.hp-ok{background:linear-gradient(90deg,#27ae60,#2ecc71);}
+.hp-bar-fill.hp-mid{background:linear-gradient(90deg,#e67e22,#f39c12);}
+
+/* Enemy panel */
+.enemy-search-row{display:flex;gap:.5rem;align-items:center;}
+.enemy-search{flex:1;background:rgba(244,234,213,.08);border:1px solid rgba(139,105,20,.4);border-radius:3px;padding:.45rem .8rem;font-family:'EB Garamond',serif;font-size:.9rem;color:var(--parch);outline:none;}
+.enemy-search::placeholder{color:rgba(200,169,110,.3);font-style:italic;}
+.enemy-search:focus{border-color:var(--gold);background:rgba(184,134,11,.06);}
+.enemy-list{display:flex;flex-direction:column;gap:.4rem;max-height:340px;overflow-y:auto;padding-right:4px;}
+.enemy-list::-webkit-scrollbar{width:4px;}
+.enemy-list::-webkit-scrollbar-track{background:transparent;}
+.enemy-list::-webkit-scrollbar-thumb{background:rgba(139,105,20,.4);border-radius:2px;}
+.enemy-row{background:rgba(244,234,213,.04);border:1px solid rgba(139,105,20,.2);border-radius:3px;padding:.45rem .7rem;cursor:pointer;transition:all .15s;display:flex;justify-content:space-between;align-items:center;}
+.enemy-row:hover{background:rgba(184,134,11,.1);border-color:rgba(139,105,20,.5);}
+.enemy-row-name{font-family:'Cinzel',serif;font-size:.75rem;font-weight:700;color:var(--parch2);}
+.enemy-row-en{font-size:.65rem;color:rgba(200,169,110,.6);font-style:italic;margin-left:.3rem;}
+.enemy-row-stats{font-size:.68rem;color:var(--gold2);letter-spacing:.04em;}
+.enemy-hd-badge{font-family:'Cinzel',serif;font-size:.56rem;font-weight:700;background:var(--red2);color:var(--gold2);padding:.1rem .3rem;border-radius:2px;letter-spacing:.06em;}
+.add-btn{background:linear-gradient(135deg,var(--red),var(--red2));border:1px solid var(--red);border-radius:2px;color:var(--gold2);font-family:'Cinzel',serif;font-size:.6rem;font-weight:700;padding:.2rem .5rem;cursor:pointer;letter-spacing:.06em;transition:all .15s;white-space:nowrap;}
+.add-btn:hover{background:linear-gradient(135deg,#a02020,var(--red));}
+
+/* Active enemies */
+.active-enemies{display:flex;flex-direction:column;gap:.4rem;margin-top:.4rem;}
+.ae-card{background:rgba(139,26,26,.12);border:1px solid rgba(139,26,26,.4);border-radius:3px;padding:.55rem .7rem;}
+.ae-header{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:.35rem;}
+.ae-name{font-family:'Cinzel',serif;font-size:.78rem;font-weight:700;color:var(--parch);}
+.ae-remove{background:none;border:none;color:rgba(200,100,100,.5);cursor:pointer;font-size:.85rem;line-height:1;transition:color .15s;}
+.ae-remove:hover{color:#e74c3c;}
+.ae-hp-rolls{display:flex;flex-wrap:wrap;gap:.25rem;margin:.3rem 0 .1rem;}
+.ae-hp-tag{background:rgba(192,57,43,.18);border:1px solid rgba(192,57,43,.35);border-radius:2px;font-family:'Cinzel',serif;font-size:.6rem;font-weight:700;color:#e8a090;padding:.1rem .35rem;letter-spacing:.04em;}
+.ae-hp-tag.dead{background:rgba(60,60,60,.25);border-color:rgba(120,120,120,.3);color:rgba(150,150,150,.5);cursor:default;text-decoration:line-through;}
+.ae-hp-tag.dead:hover{background:rgba(60,60,60,.25);border-color:rgba(120,120,120,.3);}
+.ae-stats{display:flex;gap:.35rem;flex-wrap:wrap;font-size:.7rem;}
+.ae-stat{color:var(--gold2);font-family:'Cinzel',serif;letter-spacing:.05em;}
+.ae-stat span{color:var(--parch2);}
+.ae-attack{font-size:.72rem;color:rgba(244,234,213,.75);margin-top:.28rem;border-top:1px dashed rgba(139,26,26,.3);padding-top:.28rem;line-height:1.4;}
+.ae-attack-btn{width:100%;background:rgba(139,26,26,.18);border:1px dashed rgba(139,26,26,.5);border-radius:3px;color:rgba(244,234,213,.82);font-family:'EB Garamond',Georgia,serif;font-size:.75rem;padding:.3rem .6rem;cursor:pointer;text-align:left;line-height:1.4;margin-top:.28rem;transition:all .15s;user-select:none;-webkit-user-select:none;}
+.ae-attack-btn *{pointer-events:none;}
+.ae-attack-btn:hover{background:rgba(139,26,26,.35);border-color:var(--red);color:var(--parch);}
+.ae-attack-btn:active{background:rgba(139,26,26,.5);}
+.ae-hp-editable{cursor:pointer;transition:background .15s;}
+.ae-hp-editable:hover{background:rgba(244,234,213,.18);border-color:var(--gold);}
+.atk-dmg-chip{background:rgba(192,57,43,.2);border:1px solid rgba(192,57,43,.4);border-radius:2px;font-family:'Cinzel',serif;font-size:.68rem;color:#f0a090;padding:.12rem .4rem;}
+.ae-nat19{font-size:.67rem;color:rgba(192,57,43,.85);font-style:italic;}
+.ae-qty-row{display:flex;align-items:center;gap:.4rem;margin-top:.3rem;}
+.qty-btn{background:rgba(139,105,20,.2);border:1px solid rgba(139,105,20,.3);border-radius:2px;color:var(--parch);width:22px;height:22px;font-size:.85rem;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:'Cinzel',serif;}
+.qty-btn:hover{background:rgba(139,105,20,.4);}
+.qty-label{font-family:'Cinzel',serif;font-size:.65rem;color:var(--gold2);}
+
+/* HD filter row */
+.hd-filters{display:flex;gap:.25rem;flex-wrap:wrap;margin:.3rem 0;}
+.hd-btn{background:rgba(244,234,213,.06);border:1px solid rgba(139,105,20,.3);color:rgba(200,169,110,.7);font-family:'Cinzel',serif;font-size:.58rem;font-weight:700;padding:.2rem .45rem;border-radius:12px;cursor:pointer;letter-spacing:.06em;transition:all .15s;}
+.hd-btn:hover,.hd-btn.active{background:var(--red2);border-color:var(--red);color:var(--gold2);}
+
+/* ── TAB 1 — BESTIAIRE ── */
+#panel-bestiary{flex-direction:column;}
+.bestiary-ctrl{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;}
+.bsearch{flex:1;min-width:180px;background:rgba(244,234,213,.08);border:1px solid rgba(139,105,20,.4);border-radius:3px;padding:.5rem .9rem;font-family:'EB Garamond',serif;font-size:1rem;color:var(--parch);outline:none;}
+.bsearch:focus{border-color:var(--gold);background:rgba(184,134,11,.06);}
+.bsearch::placeholder{color:rgba(200,169,110,.3);font-style:italic;}
+.bcnt{background:var(--red2);color:var(--gold2);font-family:'Cinzel',serif;font-size:.62rem;font-weight:700;padding:.5rem .7rem;border-radius:3px;letter-spacing:.06em;white-space:nowrap;}
+.bft{display:flex;gap:.25rem;flex-wrap:wrap;margin:.7rem 0;padding:.55rem .7rem;background:rgba(184,134,11,.05);border:1px solid rgba(139,105,20,.2);border-radius:3px;}
+.bft-btn{background:rgba(244,234,213,.06);border:1px solid rgba(139,105,20,.3);color:rgba(200,169,110,.7);font-family:'Cinzel',serif;font-size:.58rem;font-weight:700;padding:.22rem .5rem;border-radius:12px;cursor:pointer;letter-spacing:.07em;transition:all .15s;}
+.bft-btn:hover,.bft-btn.active{background:var(--red2);border-color:var(--red);color:var(--gold2);}
+.bcard-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:.7rem;}
+.bcard{background:var(--parch);border:2px solid var(--br);border-radius:3px;box-shadow:3px 3px 10px var(--sh);overflow:hidden;transition:transform .15s,box-shadow .15s;}
+.bcard:hover{transform:translateY(-2px);box-shadow:4px 6px 16px rgba(26,18,8,.3);}
+.bcard-head{background:linear-gradient(135deg,var(--red),var(--red2));padding:.45rem .75rem;border-bottom:2px solid var(--gold);display:flex;justify-content:space-between;align-items:center;gap:.4rem;}
+.bcard-name{font-family:'Cinzel',serif;font-weight:700;font-size:.84rem;color:var(--parch);letter-spacing:.04em;text-shadow:0 1px 3px rgba(0,0,0,.5);}
+.bcard-en{font-size:.6rem;opacity:.65;font-style:italic;font-weight:400;}
+.bcard-num{font-size:.65rem;color:#d4b896;font-style:italic;}
+.bcard-body{padding:.5rem .75rem .6rem;}
+.bcard-ks{display:flex;gap:.35rem;margin-bottom:.45rem;flex-wrap:wrap;}
+.bcard-sp{background:var(--red2);color:var(--parch);font-family:'Cinzel',serif;font-size:.6rem;font-weight:700;padding:.15rem .42rem;border-radius:2px;letter-spacing:.05em;border:1px solid var(--red);}
+.bcard-sp .v{color:var(--gold2);font-family:'EB Garamond',serif;font-weight:600;font-size:.75rem;margin-left:.15rem;}
+.bcard-ar{background:var(--parch2);border-left:3px solid var(--gold);padding:.25rem .45rem;margin-bottom:.35rem;font-size:.8rem;line-height:1.4;color:var(--ink);}
+.bcard-al{font-family:'Cinzel',serif;font-size:.54rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--red2);display:block;margin-bottom:.06rem;}
+.bcard-n19{background:rgba(139,26,26,.07);border-left:3px solid var(--red);}
+.bcard-attrs{display:flex;gap:.28rem;flex-wrap:wrap;margin:.35rem 0;}
+.bcard-ab{text-align:center;background:var(--parch2);border:1px solid rgba(139,105,20,.3);border-radius:2px;padding:.14rem .28rem;min-width:2rem;}
+.bcard-an{font-family:'Cinzel',serif;font-size:.49rem;font-weight:700;color:var(--red2);letter-spacing:.07em;display:block;}
+.bcard-av{font-size:.82rem;font-weight:600;color:var(--ink);display:block;line-height:1.1;}
+.bcard-mv{display:inline-block;background:var(--gold);color:var(--ink);font-family:'Cinzel',serif;font-size:.53rem;font-weight:700;padding:.1rem .36rem;border-radius:2px;letter-spacing:.07em;margin:.2rem .15rem .2rem 0;vertical-align:middle;}
+.bcard-ab2{font-size:.78rem;line-height:1.45;color:var(--ink);margin:.28rem 0;padding:.25rem .45rem;border-left:3px solid var(--gold);background:rgba(184,134,11,.06);font-style:italic;}
+.bcard-rc{font-size:.72rem;margin-top:.38rem;padding-top:.28rem;border-top:1px dashed var(--br);color:#4a3510;}
+.bcard-rl{font-family:'Cinzel',serif;font-size:.53rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--red2);margin-right:.25rem;}
+.bhidden{display:none!important;}
+.bcard-add-btn{background:linear-gradient(135deg,var(--red),var(--red2));border:1px solid var(--red);border-radius:2px;color:var(--gold2);font-family:'Cinzel',serif;font-size:.56rem;font-weight:700;padding:.18rem .5rem;cursor:pointer;letter-spacing:.07em;transition:all .15s;white-space:nowrap;flex-shrink:0;}
+.bcard-add-btn:hover{background:linear-gradient(135deg,#a02020,var(--red));border-color:#c03030;}
+
+/* ── TAB 2 — PARAMÈTRES ── */
+.settings-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.2rem;}
+.settings-card{background:rgba(244,234,213,.04);border:1px solid rgba(139,105,20,.3);border-radius:4px;padding:1rem 1.1rem;}
+.settings-card h3{font-family:'Cinzel',serif;font-weight:700;font-size:.8rem;text-transform:uppercase;letter-spacing:.12em;color:var(--gold2);margin-bottom:.8rem;padding-bottom:.45rem;border-bottom:1px solid rgba(139,105,20,.25);}
+.import-zone{border:2px dashed rgba(139,105,20,.4);border-radius:6px;padding:1.8rem;text-align:center;cursor:pointer;transition:all .2s;background:rgba(184,134,11,.03);margin-bottom:.8rem;}
+.import-zone:hover,.import-zone.drag-over{border-color:var(--gold);background:rgba(184,134,11,.08);}
+.import-zone-icon{font-size:2rem;margin-bottom:.5rem;}
+.import-zone-text{font-family:'Cinzel',serif;font-size:.78rem;color:rgba(200,169,110,.6);letter-spacing:.06em;}
+.import-zone-sub{font-size:.72rem;color:rgba(200,169,110,.4);font-style:italic;margin-top:.3rem;}
+.player-list{display:flex;flex-direction:column;gap:.5rem;margin-top:.6rem;}
+.player-item{background:rgba(244,234,213,.05);border:1px solid rgba(139,105,20,.25);border-radius:3px;padding:.55rem .75rem;display:flex;justify-content:space-between;align-items:center;}
+.player-item-name{font-family:'Cinzel',serif;font-size:.78rem;font-weight:600;color:var(--parch2);}
+.player-item-meta{font-size:.68rem;color:rgba(200,169,110,.6);}
+.remove-pc-btn{background:none;border:1px solid rgba(200,100,100,.25);border-radius:2px;color:rgba(200,100,100,.5);cursor:pointer;font-size:.65rem;padding:.15rem .4rem;transition:all .15s;font-family:'Cinzel',serif;}
+.remove-pc-btn:hover{border-color:#e74c3c;color:#e74c3c;}
+.file-input-btn{background:linear-gradient(135deg,var(--red),var(--red2));border:1px solid var(--red);border-radius:3px;color:var(--gold2);font-family:'Cinzel',serif;font-size:.72rem;font-weight:700;padding:.45rem 1rem;cursor:pointer;letter-spacing:.08em;transition:all .15s;display:inline-block;text-transform:uppercase;}
+.file-input-btn:hover{background:linear-gradient(135deg,#a02020,var(--red));}
+input[type=file]{display:none;}
+.hint-text{font-size:.72rem;color:rgba(200,169,110,.5);font-style:italic;margin-top:.4rem;line-height:1.5;}
+.clear-btn{background:rgba(200,100,100,.1);border:1px solid rgba(200,100,100,.25);border-radius:3px;color:rgba(200,100,100,.7);font-family:'Cinzel',serif;font-size:.68rem;font-weight:700;padding:.38rem .8rem;cursor:pointer;letter-spacing:.07em;transition:all .15s;text-transform:uppercase;}
+.clear-btn:hover{background:rgba(200,100,100,.2);border-color:#e74c3c;color:#e74c3c;}
+.json-preview{background:rgba(0,0,0,.3);border:1px solid rgba(139,105,20,.2);border-radius:3px;padding:.6rem .8rem;font-family:monospace;font-size:.68rem;color:rgba(200,169,110,.6);max-height:150px;overflow-y:auto;margin-top:.5rem;white-space:pre-wrap;word-break:break-all;}
+.format-guide{background:rgba(184,134,11,.05);border:1px solid rgba(139,105,20,.2);border-radius:3px;padding:.7rem .8rem;margin-top:.5rem;}
+.format-guide h4{font-family:'Cinzel',serif;font-size:.68rem;font-weight:700;color:var(--gold2);margin-bottom:.35rem;letter-spacing:.08em;}
+.format-guide code{font-family:monospace;font-size:.66rem;color:rgba(200,169,110,.75);display:block;line-height:1.6;}
+.status-bar{background:rgba(0,0,0,.4);border:1px solid rgba(139,105,20,.25);border-radius:3px;padding:.4rem .7rem;font-size:.72rem;color:rgba(200,169,110,.7);font-family:'Cinzel',serif;letter-spacing:.05em;min-height:2rem;}
+.status-ok{color:#27ae60;}
+.status-err{color:#e74c3c;}
+.status-info{color:var(--gold2);}
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar{width:6px;height:6px;}
+::-webkit-scrollbar-track{background:rgba(26,18,8,.4);}
+::-webkit-scrollbar-thumb{background:rgba(139,105,20,.5);border-radius:3px;}
+::-webkit-scrollbar-thumb:hover{background:rgba(139,105,20,.8);}
+
+/* ── PERSONNAGES ── */
+.char-layout{display:grid;grid-template-columns:260px 1fr;gap:1rem;flex:1;min-height:0;}
+.char-list-col{display:flex;flex-direction:column;gap:.35rem;}
+.char-list-card{background:rgba(244,234,213,.05);border:1px solid rgba(139,105,20,.25);border-radius:3px;padding:.55rem .75rem;cursor:pointer;transition:all .15s;display:flex;justify-content:space-between;align-items:center;}
+.char-list-card:hover{background:rgba(184,134,11,.1);border-color:rgba(139,105,20,.5);}
+.char-list-card.selected{background:rgba(184,134,11,.12);border-color:var(--gold);border-left:3px solid var(--gold);}
+.char-list-name{font-family:'Cinzel',serif;font-size:.78rem;font-weight:700;color:var(--parch2);}
+.char-list-meta{font-size:.65rem;color:rgba(200,169,110,.55);margin-top:.1rem;}
+.char-list-actions{display:flex;gap:.3rem;flex-shrink:0;}
+.char-list-edit{background:rgba(184,134,11,.12);border:1px solid rgba(139,105,20,.3);border-radius:2px;color:var(--gold2);font-size:.62rem;padding:.15rem .35rem;cursor:pointer;transition:all .15s;font-family:'Cinzel',serif;}
+.char-list-edit:hover{background:rgba(184,134,11,.25);}
+.char-list-del{background:none;border:1px solid rgba(200,100,100,.2);border-radius:2px;color:rgba(200,100,100,.4);font-size:.62rem;padding:.15rem .35rem;cursor:pointer;transition:all .15s;}
+.char-list-del:hover{border-color:#e74c3c;color:#e74c3c;}
+.char-add-combat{background:linear-gradient(135deg,var(--red),var(--red2));border:1px solid var(--red);border-radius:2px;color:var(--gold2);font-family:'Cinzel',serif;font-size:.55rem;font-weight:700;padding:.15rem .4rem;cursor:pointer;white-space:nowrap;transition:all .15s;}
+.char-add-combat:hover{background:linear-gradient(135deg,#a02020,var(--red));}
+/* Form */
+.char-form-col{display:flex;flex-direction:column;gap:.7rem;overflow-y:auto;padding-right:.3rem;}
+.char-form-col::-webkit-scrollbar{width:4px;}
+.cform-title{font-family:'Cinzel',serif;font-weight:900;font-size:.95rem;color:var(--gold2);letter-spacing:.06em;padding-bottom:.5rem;border-bottom:1px solid rgba(139,105,20,.25);}
+.cform-section{background:rgba(244,234,213,.04);border:1px solid rgba(139,105,20,.2);border-radius:3px;padding:.65rem .8rem;}
+.cform-section h4{font-family:'Cinzel',serif;font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--gold2);margin-bottom:.55rem;}
+.cform-row{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:.4rem;}
+.cform-group{display:flex;flex-direction:column;gap:.18rem;}
+.cform-group.grow{flex:1;min-width:80px;}
+.cform-group.fixed-sm{width:64px;flex-shrink:0;}
+.cform-group.fixed-md{width:90px;flex-shrink:0;}
+.cform-label{font-family:'Cinzel',serif;font-size:.55rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:rgba(200,169,110,.7);}
+.cform-input{background:rgba(244,234,213,.08);border:1px solid rgba(139,105,20,.35);border-radius:2px;color:var(--parch);font-family:'EB Garamond',Georgia,serif;font-size:.88rem;padding:.28rem .45rem;outline:none;width:100%;}
+.cform-input:focus{border-color:var(--gold);background:rgba(184,134,11,.06);}
+.cform-input[type=number]{text-align:center;}
+.cform-attrs{display:grid;grid-template-columns:repeat(4,1fr);gap:.4rem;}
+.cform-wpn-row{display:flex;gap:.4rem;align-items:flex-end;margin-bottom:.35rem;}
+.cform-wpn-row .cform-group{flex:1;}
+.wpn-remove{background:none;border:1px solid rgba(200,100,100,.25);border-radius:2px;color:rgba(200,100,100,.45);cursor:pointer;font-size:.7rem;padding:.2rem .4rem;align-self:flex-end;transition:all .15s;height:27px;}
+.wpn-remove:hover{border-color:#e74c3c;color:#e74c3c;}
+.add-wpn-btn{background:rgba(184,134,11,.1);border:1px solid rgba(139,105,20,.3);border-radius:2px;color:var(--gold2);font-family:'Cinzel',serif;font-size:.62rem;font-weight:700;padding:.28rem .65rem;cursor:pointer;letter-spacing:.07em;transition:all .15s;}
+.add-wpn-btn:hover{background:rgba(184,134,11,.22);}
+.skills-input{width:100%;resize:vertical;min-height:48px;background:rgba(244,234,213,.08);border:1px solid rgba(139,105,20,.35);border-radius:2px;color:var(--parch);font-family:'EB Garamond',Georgia,serif;font-size:.85rem;padding:.3rem .45rem;outline:none;}
+.skills-input:focus{border-color:var(--gold);}
+.cform-save-row{display:flex;gap:.6rem;margin-top:.3rem;}
+.cform-save-btn{flex:1;background:linear-gradient(135deg,var(--red),var(--red2));border:1px solid var(--red);border-radius:3px;color:var(--gold2);font-family:'Cinzel',serif;font-size:.75rem;font-weight:700;padding:.55rem 1rem;cursor:pointer;letter-spacing:.1em;text-transform:uppercase;transition:all .15s;}
+.cform-save-btn:hover{background:linear-gradient(135deg,#a02020,var(--red));}
+.cform-cancel-btn{background:rgba(244,234,213,.05);border:1px solid rgba(139,105,20,.25);border-radius:3px;color:rgba(200,169,110,.55);font-family:'Cinzel',serif;font-size:.72rem;font-weight:700;padding:.55rem .9rem;cursor:pointer;letter-spacing:.08em;transition:all .15s;}
+.cform-cancel-btn:hover{border-color:rgba(200,100,100,.4);color:rgba(200,100,100,.7);}
+@media(max-width:800px){.char-layout{grid-template-columns:1fr;}}
+
+/* ── RESPONSIVE ── */
+@media(max-width:700px){
+  .scene-layout{grid-template-columns:1fr;}
+  .settings-grid{grid-template-columns:1fr;}
+}
+
+/* ── POP-UP AJOUT ── */
+.popup-overlay{position:fixed;inset:0;background:rgba(10,5,0,.85);display:none;align-items:center;justify-content:center;z-index:1000;backdrop-filter:blur(3px);}
+.popup-box{background:linear-gradient(160deg,#2a1508,#1a0e05);border:2px solid var(--gold);border-radius:6px;padding:1.4rem 1.5rem;min-width:320px;max-width:440px;width:90%;box-shadow:0 8px 40px rgba(0,0,0,.8),0 0 0 1px rgba(184,134,11,.1);}
+.popup-title{font-family:'Cinzel',serif;font-weight:900;font-size:1.05rem;color:var(--gold2);letter-spacing:.06em;margin-bottom:.2rem;}
+.popup-fr{font-size:.75rem;color:rgba(200,169,110,.55);font-style:italic;margin-bottom:.8rem;}
+.popup-num-hint{font-size:.73rem;color:rgba(200,169,110,.5);font-family:'Cinzel',serif;letter-spacing:.04em;margin-bottom:.85rem;}
+.popup-row{display:flex;align-items:center;gap:.6rem;margin-bottom:.7rem;}
+.popup-label{font-family:'Cinzel',serif;font-size:.72rem;font-weight:700;color:var(--gold2);letter-spacing:.08em;min-width:6rem;}
+.popup-count-input{width:70px;background:rgba(244,234,213,.08);border:1px solid rgba(139,105,20,.5);border-radius:3px;color:var(--parch);font-family:'Cinzel',serif;font-size:1.1rem;font-weight:700;padding:.3rem .5rem;text-align:center;outline:none;}
+.popup-count-input:focus{border-color:var(--gold);}
+.popup-roll-btn{background:rgba(184,134,11,.15);border:1px solid rgba(139,105,20,.5);border-radius:3px;color:var(--gold2);font-family:'Cinzel',serif;font-size:.68rem;font-weight:700;padding:.3rem .7rem;cursor:pointer;letter-spacing:.07em;transition:all .15s;}
+.popup-roll-btn:hover{background:rgba(184,134,11,.3);border-color:var(--gold);}
+.popup-roll-result{font-family:'Cinzel',serif;font-size:.75rem;color:var(--gold3);letter-spacing:.04em;min-height:1.2rem;}
+.popup-btns{display:flex;gap:.6rem;margin-top:1rem;}
+.popup-confirm{flex:1;background:linear-gradient(135deg,var(--red),var(--red2));border:1px solid var(--red);border-radius:3px;color:var(--gold2);font-family:'Cinzel',serif;font-size:.78rem;font-weight:700;padding:.55rem 1rem;cursor:pointer;letter-spacing:.1em;text-transform:uppercase;transition:all .15s;}
+.popup-confirm:hover{background:linear-gradient(135deg,#a02020,var(--red));}
+.popup-cancel{background:rgba(244,234,213,.05);border:1px solid rgba(139,105,20,.25);border-radius:3px;color:rgba(200,169,110,.6);font-family:'Cinzel',serif;font-size:.72rem;font-weight:700;padding:.55rem .9rem;cursor:pointer;letter-spacing:.08em;transition:all .15s;}
+.popup-cancel:hover{border-color:rgba(200,100,100,.4);color:rgba(200,100,100,.7);}
+/* Reactions in active enemy cards */
+.ae-reactions-block{margin-top:.35rem;border-top:1px solid rgba(139,26,26,.25);padding-top:.32rem;display:flex;flex-direction:column;gap:.18rem;}
+.ae-reaction{display:flex;align-items:baseline;gap:.35rem;font-size:.7rem;}
+.ae-react-idx{font-family:'Cinzel',serif;font-size:.55rem;font-weight:700;color:rgba(200,169,110,.5);min-width:1.5rem;}
+.ae-react-roll{font-family:'Cinzel',serif;font-size:.68rem;font-weight:700;color:var(--gold2);min-width:2.2rem;}
+.ae-react-text{color:var(--parch2);line-height:1.3;}
+.ae-react-count{font-family:'Cinzel',serif;font-size:.55rem;font-weight:700;background:rgba(192,57,43,.3);border:1px solid rgba(192,57,43,.4);border-radius:2px;color:#e8a090;padding:.05rem .28rem;margin:0 .2rem;letter-spacing:.04em;}
+.reroll-btn{background:rgba(184,134,11,.12)!important;border-color:rgba(139,105,20,.35)!important;color:var(--gold2)!important;}
+/* ── SOUS-ONGLETS BESTIAIRE ── */
+.b-subtabs{display:flex;gap:.4rem;margin:.2rem 0 .5rem;}
+.bst-btn{background:rgba(244,234,213,.06);border:1px solid rgba(139,105,20,.3);color:rgba(200,169,110,.6);font-family:'Cinzel',serif;font-size:.68rem;font-weight:700;padding:.38rem .9rem;border-radius:3px;cursor:pointer;letter-spacing:.09em;text-transform:uppercase;transition:all .2s;}
+.bst-btn:hover{color:var(--gold2);background:rgba(184,134,11,.1);}
+.bst-btn.active{background:linear-gradient(135deg,var(--red),var(--red2));border-color:var(--red);color:var(--gold2);}
+#b-history-view{flex-direction:column;gap:.6rem;}
+.hist-card{background:rgba(244,234,213,.04);border:1px solid rgba(139,105,20,.25);border-radius:3px;padding:.6rem .8rem;}
+.hist-head{display:flex;align-items:baseline;gap:.5rem;margin-bottom:.25rem;}
+.hist-name{font-family:'Cinzel',serif;font-size:.8rem;font-weight:700;color:var(--parch2);}
+.hist-fr{font-size:.66rem;color:rgba(200,169,110,.55);font-style:italic;}
+.hist-time{margin-left:auto;font-size:.63rem;color:rgba(200,169,110,.4);font-style:italic;}
+.hist-meta{font-size:.7rem;color:var(--gold2);letter-spacing:.04em;margin-bottom:.4rem;}
+.hist-actions{display:flex;align-items:center;gap:.5rem;}
+.hist-del{background:none;border:1px solid rgba(200,100,100,.2);border-radius:2px;color:rgba(200,100,100,.4);cursor:pointer;font-size:.7rem;padding:.15rem .4rem;transition:all .15s;}
+.hist-del:hover{border-color:#e74c3c;color:#e74c3c;}
+.hist-clear-btn{background:rgba(200,100,100,.08);border:1px solid rgba(200,100,100,.2);border-radius:3px;color:rgba(200,100,100,.6);font-family:'Cinzel',serif;font-size:.65rem;font-weight:700;padding:.3rem .7rem;cursor:pointer;letter-spacing:.07em;transition:all .15s;text-transform:uppercase;margin-bottom:.4rem;align-self:flex-end;}
+.hist-clear-btn:hover{background:rgba(200,100,100,.15);border-color:#e74c3c;color:#e74c3c;}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <span class="skull">☠</span>
+  <div>
+    <div class="topbar-title">Tales of Argosa</div>
+    <div class="topbar-sub">Outil de Table — Maître de Jeu</div>
+  </div>
+</div>
+
+<!-- ====== POPUP AJOUT CRÉATURE ====== -->
+<div class="popup-overlay" id="add-popup-overlay" onclick="if(event.target===this)closeAddPopup()">
+  <div class="popup-box">
+    <div class="popup-title" id="popup-title">Créature</div>
+    <div class="popup-fr" id="popup-fr"></div>
+    <div class="popup-num-hint" id="popup-num"></div>
+    <div class="popup-row">
+      <span class="popup-label">Nombre :</span>
+      <input type="number" class="popup-count-input" id="popup-count" value="1" min="1" max="50"
+             onkeydown="if(event.key==='Enter')confirmAddEnemy()">
+      <button class="popup-roll-btn" onclick="rollPopupCount()">🎲 Tirer</button>
+    </div>
+    <div class="popup-roll-result" id="popup-roll-result"></div>
+    <div class="popup-btns">
+      <button class="popup-confirm" onclick="confirmAddEnemy()">⚔ Ajouter au Combat</button>
+      <button class="popup-cancel" onclick="closeAddPopup()">Annuler</button>
+    </div>
+  </div>
+</div>
+
+<div class="tabs">
+  <button class="tab active" onclick="showTab(0)">⚔ Scène en Cours</button>
+  <button class="tab" onclick="showTab(1)">📖 Bestiaire</button>
+  <button class="tab" onclick="showTab(2)">👤 Personnages</button>
+  <button class="tab" onclick="showTab(3)">⚙ Paramètres</button>
+</div>
+
+<!-- ====== TAB 0: SCÈNE ====== -->
+<div id="panel-scene" class="panel active">
+  <!-- Scene subtabs -->
+  <div class="scene-subtabs">
+    <button class="scene-sbt active" data-stab="combat" onclick="showSceneSubTab('combat')">⚔ Combat en Cours</button>
+    <button class="scene-sbt" data-stab="combat-history" onclick="showSceneSubTab('combat-history')">📜 Historique des Combats</button>
+    <div class="scene-sbt-spacer"></div>
+    <button class="end-combat-btn" id="end-combat-btn" onclick="endCombat()" style="display:none;">🏁 Fin du Combat</button>
+  </div>
+
+  <!-- Combat view -->
+  <div id="scene-combat-view">
+    <div class="scene-layout">
+      <!-- LEFT: Players in combat -->
+      <div class="scene-col">
+        <div class="col-title">👥 Joueurs en Combat <span style="font-size:.6rem;opacity:.6;font-weight:400;">(ajoutez depuis Personnages ⚔)</span></div>
+        <div id="combat-players">
+          <div class="no-pc" style="font-size:.74rem;">Ajoutez des joueurs depuis l'onglet Personnages</div>
+        </div>
+      </div>
+      <!-- RIGHT: Active Enemies -->
+      <div class="scene-col">
+        <div class="col-title">👹 En Combat <span style="font-size:.6rem;opacity:.6;font-weight:400;">(ajoutez depuis le Bestiaire)</span></div>
+        <div class="active-enemies" id="active-enemies">
+          <div class="no-pc" style="font-size:.75rem;">Ajoutez des créatures depuis l'onglet Bestiaire</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Combat history view -->
+  <div id="scene-history-view" style="display:none;flex-direction:column;gap:.7rem;">
+    <div id="combat-history-list"></div>
+  </div>
+</div>
+
+<!-- ====== TAB 1: BESTIAIRE ====== -->
+<div id="panel-bestiary" class="panel">
+  <div class="b-subtabs">
+    <button class="bst-btn active" data-tab="bestiary" onclick="showBSubTab('bestiary')">📖 Bestiaire</button>
+    <button class="bst-btn" data-tab="history" onclick="showBSubTab('history')">🕒 Historique Récent</button>
+  </div>
+  <!-- Bestiary view -->
+  <div id="b-bestiary-view">
+    <div class="bestiary-ctrl">
+      <input class="bsearch" id="b-search" type="text" placeholder="Rechercher par nom (FR ou EN)…" oninput="filterBestiary()">
+      <div class="bcnt" id="b-cnt">161 créatures</div>
+    </div>
+    <div class="bft" id="b-filters"></div>
+    <div class="bcard-grid" id="b-grid"></div>
+  </div>
+  <!-- History view -->
+  <div id="b-history-view" style="display:none;flex-direction:column;gap:.6rem;">
+    <button class="hist-clear-btn" onclick="clearHistory()">Effacer l'historique</button>
+    <div id="history-list"></div>
+  </div>
+</div>
+
+<!-- ====== TAB 2: PERSONNAGES ====== -->
+<div id="panel-characters" class="panel">
+  <div class="char-layout">
+    <!-- Left: list -->
+    <div class="char-list-col">
+      <div class="col-title" style="margin-bottom:.6rem;">👤 Personnages Joueurs</div>
+      <div id="char-list"></div>
+      <button class="file-input-btn" style="margin-top:.7rem;font-size:.7rem;padding:.4rem .9rem;width:100%;" onclick="openCharForm(-1)">+ Nouveau Personnage</button>
+    </div>
+    <!-- Right: form -->
+    <div class="char-form-col" id="char-form-col">
+      <div class="no-pc" style="padding:2.5rem 1rem;">Sélectionnez un personnage ou créez-en un nouveau</div>
+    </div>
+  </div>
+</div>
+
+<!-- ====== TAB 3: PARAMÈTRES ====== -->
+<div id="panel-settings" class="panel">
+  <div class="settings-grid">
+    <div class="settings-card">
+      <h3>💾 Export / Import JSON</h3>
+      <p style="font-size:.78rem;color:rgba(200,169,110,.6);margin-bottom:.8rem;line-height:1.5;">Sauvegardez ou restaurez la liste complète des personnages joueurs.</p>
+      <div style="display:flex;gap:.6rem;flex-wrap:wrap;">
+        <button class="file-input-btn" onclick="exportPlayersJSON()">⬇ Exporter JSON</button>
+        <label class="file-input-btn" onclick="document.getElementById('file-input').click()" style="cursor:pointer;">⬆ Importer JSON</label>
+      </div>
+      <input type="file" id="file-input" accept=".json" multiple onchange="handleFileInput(event)" style="display:none">
+      <div class="status-bar" id="import-status" style="margin-top:.7rem;">En attente…</div>
+    </div>
+    <div class="settings-card">
+      <h3>🗑 Réinitialisation</h3>
+      <p style="font-size:.78rem;color:rgba(200,169,110,.6);margin-bottom:.8rem;line-height:1.5;">Supprime tous les personnages et/ou l'historique de combat.</p>
+      <div style="display:flex;gap:.6rem;flex-wrap:wrap;">
+        <button class="clear-btn" onclick="clearAllPlayers()">Effacer personnages</button>
+        <button class="clear-btn" onclick="clearHistory()">Effacer historique</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const MONSTERS=[{"fr":"Singe","en":"Ape","hd":"3","ca":"11","dv":"3+4","attack":"Poings (2) 1d6+2","nat19":"Étreinte d'ours: Jet de Chance (Con) ou Côtes Brisées","mv":"Escalade Normale","attrs":{"S":19,"D":13,"C":15,"I":3,"P":10,"W":13,"Ch":8,"L":6},"special":"","reaction":"2-4 Hostile · 5-6 Destructeur · 7-9 Prudent · 10-12 Curieux","num":"#2d6"},{"fr":"Oiseau / Chauve-Souris","en":"Bird / Bat","hd":"1","ca":"14","dv":"1d6","attack":"Griffure 1d4+1","nat19":"Bloody Eyes : cible Aveugle jusqu'à la fin de son prochain tour","mv":"S'envole","attrs":{"S":5,"D":16,"C":8,"I":2,"P":16,"W":10,"Ch":8,"L":5},"special":"Vol Très Rapide. Av. en Perception visuelle","reaction":"2-5 S'envole · 6-8 Nerveux · 9-10 Prudent · 11 Curieux · 12 Amical","num":"#1"},{"fr":"Ours","en":"Bear","hd":"4","ca":"11","dv":"4+4","attack":"Griffes (2) 1d8+1 et Morsure 2d6","nat19":"Étreinte d'ours: Jet de Chance (Con) ou Côtes Brisées","mv":"Dépl. Rapide","attrs":{"S":19,"D":8,"C":15,"I":3,"P":12,"W":15,"Ch":7,"L":7},"special":"","reaction":"2-3 Hostile · 4-5 Bougon · 6-8 Affamé · 9-12 Intéressé","num":"#1d2"},{"fr":"Sanglier","en":"Boar","hd":"3","ca":"12","dv":"3","attack":"Défense 1d8+2","nat19":"Severe goring: Trauma Tranchant (1d8+3)","mv":"Dépl. Rapide","attrs":{"S":15,"D":10,"C":17,"I":2,"P":10,"W":14,"Ch":4,"L":7},"special":"Bestial fury quand Blessé gaining advantage sur attacks","reaction":"2-4 Charge! · 5-6 Hostile · 7-8 Menaçant · 9-10 Guarded · 11-12 Exploratoire","num":"#1"},{"fr":"Chat","en":"Cat","hd":"1","ca":"13","dv":"1d4","attack":"Griffure 1d3","nat19":"Latches onto cible’s back, ne peut plus être attaquée par la cible prochain tour","mv":"Dépl. Rapide","attrs":{"S":4,"D":18,"C":8,"I":2,"P":16,"W":10,"Ch":13,"L":5},"special":"Av. en Furtivité, Escalade et Équilibre","reaction":"2-4 Griffe et égratigne, féroce · 5-6 Hautainement irrité · 6-8 Languissamment indifférent · 9-10 Un œil curieux · 11-12 Ronronnant affectueusement","num":"#1"},{"fr":"Cheval","en":"Horse","hd":"2","ca":"10","dv":"2","attack":"Coup de pied 1d6+1","nat19":"Coup de sabot au crâne: Jet de Chance (Con) ou inconscient pendant 1d4 rounds","mv":"Dépl. Rapide","attrs":{"S":19,"D":10,"C":16,"I":2,"P":10,"W":13,"Ch":6,"L":6},"special":"","reaction":"2-3 Hostile · 4-5 Uneasy · 6-8 Indifférent · 9-10 Aux aguets · 11-12 Intéressé","num":"#1"},{"fr":"Rat Swarm","en":"Rat Swarm","hd":"2","ca":"11","dv":"2","attack":"Bites 1d6 + maladie","nat19":"Overwhelmed! Chance (For/Dex) ou Sans défense pour 1d3 rounds","mv":"Normale","attrs":{"S":3,"D":15,"C":4,"I":2,"P":10,"W":7,"Ch":4,"L":5},"special":"Swarm (p.170). Menacer les rats avec du feu peut les tenir à distance un instant","reaction":"2-3 Affamé Rat Swarm! · 4-5 Hostile · 6-8 Menaçant · 9-10 Méfiant · 11-12 Fearful","num":"#1"},{"fr":"Rhino","en":"Rhino","hd":"5","ca":"12","dv":"5","attack":"Horn 2d8","nat19":"Skewered: Impaled, Côtes Brisées, ou Internal Bleeding (Trauma Tranchant)","mv":"Dépl. Rapide","attrs":{"S":19,"D":8,"C":13,"I":3,"P":10,"W":10,"Ch":4,"L":7},"special":"","reaction":"2-4 Hostile · 5-6 Agressif · 7-8 Indifférent · 9-10 Alert · 11-12 Curieux","num":"#1d4"},{"fr":"Requin","en":"Shark","hd":"3","ca":"11","dv":"3+2","attack":"Morsure 2d6","nat19":"Jet de Chance (Con) ou Bras Sectionné ou Leg,","mv":"Nage Rapide","attrs":{"S":19,"D":14,"C":19,"I":2,"P":10,"W":10,"Ch":4,"L":6},"special":"Frenzies quand ils ou cible is Blessé: Morsure (2) per action)","reaction":"2-4 Hostile · 5-9 Affamé · 10-11 Prudent · 12 Intéressé","num":"#1d6"},{"fr":"Serpent","en":"Snake","hd":"1","ca":"11","dv":"1d6","attack":"Morsure 1d3 + Poison","nat19":"Strong dose: double Poison effect","mv":"Normale","attrs":{"S":9,"D":15,"C":12,"I":2,"P":10,"W":10,"Ch":5,"L":4},"special":"Le MJ choisit le Poison ou tire sur la Tableau des Poisons (p.226)","reaction":"2-5 Hostile · 6-8 Menaçant · 9-10 Careful · 11 Curieux · 12 Amical","num":"#1"},{"fr":"Tigre","en":"Tiger","hd":"4","ca":"13","dv":"4","attack":"Griffes (2) 1d6+2 et Morsure 1d8+2","nat19":"Trauma Tranchant (1d10+2)","mv":"Dépl. Rapide","attrs":{"S":19,"D":13,"C":17,"I":3,"P":13,"W":10,"Ch":6,"L":7},"special":"Si les deux Griffes touchent, la cible est Renversée et la Morsure touche automatiquement","reaction":"2-4 Hostile · 5-6 Agressif · 7-8 Affamé · 9-10 Prudent · 11-12 Curieux","num":"#2d4"},{"fr":"Loup / Chien","en":"Wolf / Dog","hd":"1","ca":"12","dv":"1+2","attack":"Morsure 1d8","nat19":"Renversé, contest. de For pour se relever","mv":"Dépl. Rapide","attrs":{"S":13,"D":14,"C":15,"I":4,"P":12,"W":10,"Ch":6,"L":4},"special":"Av. pour pistage, et +1 en attaque quand en surnombre","reaction":"2-4 Hostile · 5-6 Affamé · 7-8 Méfiant · 9-10 Reniflant avec curiosité · 11-12 Amical","num":"#4d4"},{"fr":"Terreur Oculaire","en":"Eye Terror","hd":"12","ca":"17","dv":"12","attack":"Morsure 3d6 et 1d6 Eye Stalks special","nat19":"Nasty Morsure: Jet de Chance (Dex) ou Bras Sectionné (Trauma Tranchant)","mv":"Vol Rapide","attrs":{"S":14,"D":12,"C":14,"I":9,"P":19,"W":16,"Ch":1,"L":12},"special":"Eye Stalk Beams provoquent des sorts aléatoires (Int 19), tirer 1d6 : (i) Crush of the Warp, (ii) Brain Burst, (iii) Flesh to Stone, (iv) Dark Slumber, (v) Lightning Bolt, (vi) Infuse Animus. Régén. (1d12, argent, feu)","reaction":"2-4 Enragé · 5-9 Hostile · 10-12 Contrarié","num":"#1"},{"fr":"Terreur Babillante","en":"Gibbering Terror","hd":"8","ca":"14","dv":"8","attack":"Morsure 2d8","nat19":"Disturbing Moan: portée Proche, Jet de Chance (Vol) ou Folie aléatoire","mv":"Escalade Normale","attrs":{"S":16,"D":7,"C":16,"I":3,"P":10,"W":14,"Ch":1,"L":9},"special":"Regarder un Gibbering Terror nécessite un jet de Chance (Vol) pour résister un Folie aléatoire. Régén. (1d12, argent, feu)","reaction":"2-12 Claquement de dents et babillages de mort","num":"#1"},{"fr":"Terreur Écorchée","en":"Skinless Terror","hd":"3","ca":"10","dv":"3","attack":"Morsure (2) 1d8","nat19":"Frenzied Death: automatic 10 dégâts et le Terror dies","mv":"Leap Proche","attrs":{"S":13,"D":13,"C":13,"I":3,"P":13,"W":13,"Ch":1,"L":7},"special":"Dies within 2d6 mins de se manifesting. Régén. (1d12, argent, feu)","reaction":"2-12 Frénésie sanguinaire agonisante","num":"#1"},{"fr":"Armure Animée","en":"Animated Armour","hd":"2","ca":"15","dv":"2","attack":"Poing 1d10","nat19":"Cible’s armure aussi animates et commence à étouffer la victime","mv":"Normale","attrs":{"S":12,"D":8,"C":10,"P":10,"L":5},"special":"Reac As creator’s orders","reaction":"As creator’s orders","num":"#1"},{"fr":"Table Animée","en":"Animated Table","hd":"4","ca":"12","dv":"4","attack":"Percée 2d6","nat19":"Renversé, contest. de For pour se relever","mv":"Normale","attrs":{"S":15,"D":7,"C":12,"P":10,"L":7},"special":"Reac As creator’s orders","reaction":"As creator’s orders","num":"#1"},{"fr":"Tapis Animé","en":"Animated Rug","hd":"3","ca":"10","dv":"3","attack":"Gifle 1d10","nat19":"Engulf: contest. de Pour (action) ou Sans défense","mv":"Normale","attrs":{"S":16,"D":13,"C":10,"P":10,"L":6},"special":"Reac As creator’s orders","reaction":"As creator’s orders","num":"#1"},{"fr":"Épée Animée","en":"Animated Sword","hd":"1","ca":"16","dv":"1","attack":"Taillade 1d8","nat19":"Trauma Tranchant (as arme)","mv":"Vol Normal","attrs":{"S":10,"D":15,"C":9,"P":10,"L":8},"special":"","reaction":"As creator’s orders","num":"#1"},{"fr":"Armoire Animée","en":"Animated Wardrobe","hd":"6","ca":"10","dv":"6","attack":"Martèlement 2d8","nat19":"Trauma Contondant (1d10+2)","mv":"Normale","attrs":{"S":18,"D":6,"C":16,"P":10,"L":8},"special":"Créée par un lanceur de sorts. Suit les ordres de son créateur","reaction":"Ordres du créateur","num":"#1"},{"fr":"Fourmi Ouvrière (géante)","en":"Worker Ant","hd":"2","ca":"13","dv":"2","attack":"Morsure 1d6","nat19":"Renversé","mv":"Normale","attrs":{"S":16,"D":10,"C":16,"I":1,"P":10,"W":10,"Ch":4,"L":5},"special":"Giant Ants gagne +1 attack bonus pour chaque extra ant (max +4)","reaction":"2-3 Hostile · 4-5 Unsure · 6-8 Intéressé · 9-10 Attiré · 11-12 Amical","num":"#2d6"},{"fr":"Fourmi Soldat (géante)","en":"Soldier Ant","hd":"3","ca":"15","dv":"3+3","attack":"Morsure 2d4 + Poison: 1d4 Con, Jet de Chance (Con) pour moitié","nat19":"Acide Crachat causing 2d4","mv":"Normale","attrs":{"S":19,"D":12,"C":16,"I":1,"P":12,"W":12,"Ch":8,"L":6},"special":"Giant Ants gagne +1 attack bonus pour chaque extra ant (max +4)","reaction":"2-5 Hostile · 6-8 Menaçant · 9-10 Prudent · 11-12 Investigateur","num":"#2d3"},{"fr":"Reine des Fourmis (géante)","en":"Queen Ant","hd":"6","ca":"16","dv":"6","attack":"Morsure 3d4 et Dard 1d6 + Poison: 1d6 Con perte, Jet de Chance (Con) pour moitié","nat19":"","mv":"Normale","attrs":{"S":19,"D":8,"C":19,"I":1,"P":15,"W":15,"Ch":16,"L":10},"special":"Sur Nat 18-20 Cible crushed dans mandibles 3d6 dég à start de son tour jusqu'à contest. de Pour (action) pour se libérer","reaction":"2-5 Hostile · 6-8 Defiant · 9-11 Heedful · 12 Scrutateur","num":"#1"},{"fr":"Banshee","en":"Banshee","hd":"7","ca":"15","dv":"7","attack":"Toucher 2d8","nat19":"Vieillissement 3d8 ans, Jet de Chance (Vol) résiste","mv":"Normale","attrs":{"S":16,"D":14,"C":14,"I":14,"P":13,"W":16,"Ch":6,"L":9},"special":"Death Wail : zone Proche autour de la Banshee, Jet de Chance (Vol) ou réduit à zéro PV. Recharge quand Blessé. Après combat, Les survivants d'un Death Wail font un Jet de Chance (Vol) ou vieillissent 3d8 ans","reaction":"2-6 Hostile · 7-8 Haineux · 9-10 Malveillant · 11-12 Avide","num":"#1"},{"fr":"Basilic","en":"Basilisk","hd":"10","ca":"16","dv":"10","attack":"Morsure 2d8 et Regard portée Loin, Jet de Chance (Con) ou cible pétrifié","nat19":"Jet de Chance ou l'arme/armure est pétrifiée","mv":"Normale","attrs":{"S":20,"D":10,"C":16,"I":2,"P":10,"W":14,"Ch":3,"L":10},"special":"","reaction":"2-4 Violent · 5-6 Affamé · 7-9 Irrité · 10-12 Hésitant","num":"#1"},{"fr":"Coléoptère de Feu","en":"Fire Beetle","hd":"4","ca":"16","dv":"4","attack":"Acide Aspersion portée Proche 2d4+2","nat19":"Caught dans mandibles suffering 2d4 acide dégâts sur cible’s tour sauf si contest. de Pour (action) pour se libérer","mv":"Normale","attrs":{"S":16,"D":10,"C":14,"I":2,"P":10,"W":12,"Ch":8,"L":7},"special":"","reaction":"2-5 Antagonistic · 6-8 Affamé · 9-10 Méfiant · 10-12 Intéressé","num":"#2d4"},{"fr":"Bugbear","en":"Bugbear","hd":"3","ca":"12","dv":"3","attack":"Griffes (2) 1d4+1 et Morsure 1d6","nat19":"","mv":"Normale","attrs":{"S":18,"D":9,"C":15,"I":7,"P":11,"W":12,"Ch":8,"L":6},"special":"Si les deux Griffes touchent, la cible subit 12 dégâts (ignore les dégâts de Griffes normaux dégâts). Raging Bugbears kill inconscient victims avec son prochain action si le body is pas recovered","reaction":"2-5 Hostile · 6-8 Explosif · 9-10 Méfiant · 11-12 Laconique","num":"#1d10"},{"fr":"Bulette","en":"Bulette","hd":"9","ca":"18","dv":"9+4","attack":"Morsure 3d6","nat19":"","mv":"Fouissement Normal","attrs":{"S":22,"D":13,"C":19,"I":2,"P":13,"W":14,"Ch":3,"L":10},"special":"Tremor Sense Loin. Si attaque par surprise, +3 en attaque et dégâts doublés","reaction":"2-9 Affamé · 10-12 Joueur (blissfully unaware de son own strength)","num":"#1"},{"fr":"Centaure","en":"Centaur","hd":"2","ca":"12","dv":"2","attack":"Coup de pied 1d6 et Lance 1d6+1","nat19":"Mule Coup de pied: Double dégâts et renversé","mv":"Dépl. Rapide","attrs":{"S":18,"D":14,"C":15,"I":8,"P":13,"W":13,"Ch":10,"L":5},"special":", double spear dégâts sur un charge","reaction":"2-5 Charge! · 6-7 Belliqueux · 8-9 Distant · 10-11 Prudent · 12 Inquisiteur","num":"#2d4"},{"fr":"Scolopendre Géante","en":"Giant Centipede","hd":"2","ca":"13","dv":"2","attack":"Morsure 1d8 et Dard Poison: Jet de Chance (Con) ou 1d3 Dex perte","nat19":"Strong Poison dose: double Dex perte","mv":"Escalade Normale","attrs":{"S":14,"D":14,"C":10,"I":1,"P":10,"W":10,"Ch":2,"L":5},"special":"","reaction":"2-5 Violent · 6-8 Affamé · 9-10 Confus · 11-12 Exploratoire","num":"#2d12"},{"fr":"Chuul","en":"Chuul","hd":"5","ca":"16","dv":"5+2","attack":"Griffe 2d6 et Tentacule Poison: Jet de Chance (Con) ou Folie","nat19":"Pincer Snap : arme détruite","mv":"Swim Proche","attrs":{"S":19,"D":11,"C":15,"I":10,"P":12,"W":14,"Ch":5,"L":8},"special":"Hard Shell : Immunisé contre les coups critiques","reaction":"2-8 Meurtrier · 9-10 Vorace · 11-12 Destructeur","num":"#1d4"},{"fr":"Cocatrix","en":"Cockatrice","hd":"4","ca":"13","dv":"4","attack":"Morsure 1d6 + Petrify: Jet de Chance (Con) ou pétrifié dans 1d4 rounds","nat19":"Jet de Chance ou l'arme/armure est pétrifiée","mv":"Vol Normal","attrs":{"S":6,"D":17,"C":11,"I":2,"P":13,"W":10,"Ch":5,"L":7},"special":"","reaction":"2-4 Hostile · 5-6 Crowing Aggressively · 7-8 Peckish · 9-10 Vigilant · 11-12 Disinterested","num":"#1d6"},{"fr":"Crocodile Géant","en":"Giant Crocodile","hd":"6","ca":"14","dv":"6","attack":"Morsure 2d6+2","nat19":"","mv":"Nage Normale","attrs":{"S":20,"D":10,"C":19,"I":3,"P":10,"W":12,"Ch":5,"L":8},"special":"","reaction":"2-5 Violent · 6-8 Affamé · 9-10 Bougon · 11-12 Inconscient","num":"#2d4"},{"fr":"Cyclope","en":"Cyclops","hd":"7","ca":"12","dv":"7","attack":"Gourdin 2d8+1","nat19":"","mv":"Normale","attrs":{"S":19,"D":12,"C":16,"I":6,"P":8,"W":10,"Ch":9,"L":9},"special":"-2 penalty sur ranged attacks","reaction":"2-5 Hostile · 6-7 Affamé · 8-9 Avide · 11-12 Curieux. Demons share certain characteristics (p.168) but come dans many shapes et sizes. Le grimoires de Sulénocratha suggest certains peut accorde wishes, albeit à terrible cost","num":"#3d6"},{"fr":"Balor (Boss)","en":"Balor","hd":"20","ca":"21","dv":"20+4","attack":"Épée 3d12+1 et Fouet Proche Portée, traîne into Corps à corps, subir 3d6 feu dégâts sur cible’s tour sauf si contest. de Pour (action) pour se libérer","nat19":"","mv":"Vol Normal","attrs":{"S":22,"D":14,"C":20,"I":16,"P":20,"W":18,"Ch":16,"L":16},"special":"Boss Traits. Crit 18-20. Résistance à la Magie 75%. Immunisé contre les armes non magiques (excl. fer froid, eau bénite). Once per week, peut use ritual magic pour summon 2d10 lesser demons","reaction":"2-3 Hostile · 4-5 Violent · 6-8 Malveillant · 9-10 Distant · 11-12 Intrigué","num":"#1"},{"fr":"Basartu","en":"Basartu","hd":"5","ca":"14","dv":"5+5","attack":"Life Leech portée Proche 2d6+1","nat19":"Basartu peut possess le cible, Jet de Chance (Vol) résiste","mv":"Vol Normal","attrs":{"S":18,"D":16,"C":14,"I":15,"P":15,"W":15,"Ch":15,"L":8},"special":"Résistance à la Magie 50%. Immunisé contre les armes non magiques (excl. fer froid, eau bénite). Peut switch between host form et corrupted form (action). Possession lasts jusqu'au host is killed ou par ritual (GM determines)","reaction":"2-5 Malicious · 6-8 Trompeur · 9-10 Jaloux · 11-12 Épris","num":"#1"},{"fr":"Gmorsha","en":"Gmorsha","hd":"8","ca":"16","dv":"8","attack":"Morsure 3d8","nat19":"Jet de Chance (Con) ou se transformed into un Sans défense fleshjelly pour 2d6 days","mv":"Escalade Normale","attrs":{"S":19,"D":10,"C":15,"I":10,"P":10,"W":16,"Ch":7,"L":9},"special":"Résistance à la Magie 60%. Immunisé contre les armes non magiques (excl. fer froid, eau bénite). Peut switch between object form et demon form (action)","reaction":"2-12 Meurtrier","num":"#1"},{"fr":"Chien Infernal","en":"Hellhound","hd":"4","ca":"13","dv":"4","attack":"Morsure 2d6","nat19":"Cible Saisi et En flammes","mv":"Dépl. Rapide","attrs":{"S":13,"D":13,"C":13,"I":2,"P":15,"W":14,"Ch":5,"L":7},"special":"Résistance à la Magie 90%. Fire Breath (2) portée Proche, deux cibles adjacentes 5d6 (Jet de Chance (Dex) pour moitié). Immunisé contre feu et armes non magiques (excl. fer froid, eau bénite)","reaction":"2-12 Hostile","num":"#2d4"},{"fr":"Diablotin","en":"Imp","hd":"3","ca":"15","dv":"3","attack":"Griffe 1d6+1 et Morsure 1d4 + Poison: perd 1 Chance et amnesia pour dernier 1d4 hours, Jet de Chance (Con) annule le amnesia","nat19":"Imp casts un spell","mv":"Vol Normal","attrs":{"S":14,"D":16,"C":10,"I":14,"P":15,"W":14,"Ch":14,"L":10},"special":"Résistance à la Magie 40%. Immunisé contre les armes non magiques (excl. fer froid, eau bénite). Spells (3, Int 17) A Wisp Unseen, Shadows \\u0026amp; Dust, Crush of the Warp, Brain Burst, Gaze of Beguilement","reaction":"2-5 Meurtrier · 6-8 Malveillant · 9-10 Curieux · 11-12 Conspirateur","num":"#1"},{"fr":"Malafas","en":"Malafas","hd":"13","ca":"14","dv":"13","attack":"Tentacule (2) 2d8","nat19":"","mv":"Escalade Normale","attrs":{"S":20,"D":9,"C":19,"I":12,"P":11,"W":17,"Ch":5,"L":13},"special":"Off Turn Attacks. Résistance à la Magie 80%. Immunisé contre les armes non magiques (excl. fer froid, eau bénite). Peut switch between humanoid forms (action)","reaction":"2-5 Hostile · 6-8 Avide d'âmes · 9-10 Haineux · 11-12 Avide","num":"#1"},{"fr":"Surgat","en":"Surgat","hd":"7","ca":"13","dv":"7","attack":"Morsure 2d8+1","nat19":"","mv":"Leap Proche","attrs":{"S":19,"D":11,"C":16,"I":6,"P":14,"W":10,"Ch":4,"L":9},"special":"Résistance à la Magie 50%. Immunisé contre les armes non magiques (excl. fer froid, eau bénite). Peut switch between animal et demon forms (action)","reaction":"2- 6 Violent · 7-9 Vorace · 10-12 Aux aguets. Un selection de prehistoric man eating dinosaurs pour extrapolate from","num":"#1"},{"fr":"Ankylosaurus","en":"Ankylosaurus","hd":"12","ca":"19","dv":"12","attack":"Tail 3d10","nat19":"","mv":"Normale","attrs":{"S":20,"D":10,"C":20,"I":3,"P":13,"W":13,"Ch":10,"L":12},"special":"","reaction":"2-4 Hostile · 5-8 Distant · 9-10 Tentative · 11-12 Amical","num":"#2d4"},{"fr":"Raptor","en":"Raptor","hd":"3","ca":"13","dv":"3","attack":"Morsure 1d10+1","nat19":"Another Raptor suddenly leaps out du jungle!","mv":"Leap Proche","attrs":{"S":14,"D":14,"C":10,"I":4,"P":10,"W":10,"Ch":4,"L":6},"special":"Extra +1 en attaque quand en surnombre l'ennemi","reaction":"2-5 Frenzied · 6-8 Affamé · 9-10 Testing · 11-12 Inquisiteur","num":"#2d6"},{"fr":"Tricératops","en":"Triceratops","hd":"16","ca":"16","dv":"16","attack":"Horns 3d8+2","nat19":"Skewered: Jet de Chance (Dex) ou réduit àour zéro PV","mv":"Normale","attrs":{"S":21,"D":9,"C":21,"I":3,"P":10,"W":12,"Ch":9,"L":16},"special":"","reaction":"2-4 Angry · 5-7 Uncertain · 8-10 Curieux · 11-12 Amical. t-REX Tyrannosaurus Rex is le gigantic, 40 ft dinosaur king du prehistoric era. Son oversized skull et jaws, dans combination avec son aggression et speed, make cela le top predator dans le zone","num":"#1d6"},{"fr":"T-Rex","en":"T-Rex","hd":"20","ca":"14","dv":"20","attack":"Morsure 3d10+2","nat19":"","mv":"Normale","attrs":{"S":23,"D":13,"C":21,"I":3,"P":12,"W":15,"Ch":4,"L":16},"special":"Off Turn Attacks. Creatures de 4 HD ou moins doit make un Vol check ou fuir dans terror pour 2d6 rounds","reaction":"2-5 Enragé · 6-8 Vorace · 9-10 Uncertain · 11-12 Inconscient","num":"#1"},{"fr":"Doppelganger","en":"Doppelganger","hd":"4","ca":"13","dv":"4","attack":"Griffes (2) 1d6+1","nat19":"Doppelganger steals un deep secret du cible","mv":"Normale","attrs":{"S":16,"D":16,"C":12,"I":16,"P":15,"W":16,"Ch":16,"L":7},"special":"Immunisé contre Pierce le Veil et charm effects. Résistance à la Magie 50%","reaction":"2-5 Meurtrier · 6-8 Guarded · 9-12 Conspirateur","num":"#1"},{"fr":"Dragon (Boss)","en":"","hd":"20","ca":"22","dv":"20+8","attack":"Griffes (2) 2d10 et Morsure 3d10+2","nat19":"","mv":"Vol Rapide","attrs":{"S":23,"D":14,"C":23,"I":4,"P":22,"W":20,"Ch":16,"L":16},"special":"Boss Traits. Av. en Perception inc smell. Foes de 7 HD ou moins doit make un Vol check ou fuir dans terror pour 2d6 rounds. Fire Breath (recharge 30%) portée Très Loin, targets dans un zone Proche subir 20d6 dégâts et En flammes (Jet de Chance (Dex) pour moitié)","reaction":"2-4 Enragé · 5-6 Violent · 7-8 Vorace · 9-10 Inamical · 11-12 Fasciné","num":"#1"},{"fr":"Young Dragon","en":"Young Dragon","hd":"10","ca":"17","dv":"10","attack":"Griffes (2) 1d12 et Morsure 2d10","nat19":"","mv":"Vol Rapide","attrs":{"S":20,"D":15,"C":19,"I":4,"P":20,"W":17,"Ch":13,"L":11},"special":"Av. en Perception inc smell. Foes de 4 HD ou moins doit make un Vol check ou fuir dans terror pour 2d6 rounds. Poison Souffle (recharge 30%) portée Loin, targets dans un zone Proche subir 10d6 dégâts et 1d6 perte de For (Jet de Chance (Con) pour moitié)","reaction":"2-4 Destructeur · 5-7 Affamé · 8-9 Careful · 10-12 Desirous","num":"#1"},{"fr":"Nain","en":"Dwarf","hd":"1","ca":"15 (plate)","dv":"1","attack":"Hammer 1d8","nat19":"Trauma Contondant (1d10+2)","mv":"Normale","attrs":{"S":11,"D":10,"C":14,"I":10,"P":10,"W":10,"Ch":8,"L":4},"special":"Avantage vs poison ou magic, 50% chance sniff out gold, argent ou gems, gold lust","reaction":"2-3 Hostile · 4-5 Prudent · 6-7 Bougon · 8-10 Inquisiteur · 11-12 Amical. Eagle, giant Giant eagles have 20 ft wingspans et hunt dans mountains, forests, et plains, généralement preferring animal prey. Dans times de scarcity, ou quand feeding chicks, ils sometimes hunt humans, making dives against lone explorers ou small groups. Ils are instinctual enemies du serpentmen","num":"#4d6"},{"fr":"Aigle Géant","en":"Giant Eagle","hd":"3","ca":"13","dv":"3+3","attack":"Griffes (2) 1d6 et Morsure 2d4","nat19":"Cible Saisi \\u0026amp; carried away","mv":"Fly Very","attrs":{"S":16,"D":14,"C":14,"I":2,"P":15,"W":14,"Ch":7,"L":6},"special":", Fast. Avantage sur sight based Perception checks. Si le cible is surprised, attack avec advantage et peut carry away son victime (contest. de For pour résister, pas de action)","reaction":"2-4 Hostile · 5-6 Affamé (especially pour dogs, mules, ou horses) 7-8 Reserved · 9-10 Curieux · 11-12 Amical","num":"#1d4"},{"fr":"Élémentaire d'Air","en":"Air Elemental","hd":"5","ca":"16","dv":"5/10/15","attack":"Batter 2d4/2d8/3d8","nat19":"À terre \\u0026amp; Étourdi","mv":"Vol Rapide","attrs":{"D":23,"C":10,"I":3,"P":14,"W":16,"Ch":3},"special":"Immunisé contre les armes non magiques excl.ing fer froid. Suffocate (1) Proche targets suffoque jusqu'au elemental is defeated ou driven off (Jet de Chance (Con) résiste)","reaction":"As creator’s orders ou · 2-5 Hostile · 6-8 Malicieux · 9-12 Curieux","num":"#1"},{"fr":"Élémentaire de Terre","en":"Earth Elemental","hd":"5","ca":"19","dv":"5/10/15","attack":"Poing 2d6/2d10/3d10","nat19":"","mv":"Fouissement Normal","attrs":{"D":10,"C":22,"I":3,"P":10,"W":16,"Ch":3},"special":"Immunisé contre les armes non magiques excl.ing fer froid","reaction":"As creator’s orders ou · 2-6 Violent · 7-9 Bougon · 9-12 Prudent","num":"#1"},{"fr":"Élémentaire de Feu","en":"Fire Elemental","hd":"5","ca":"16","dv":"5/10/15","attack":"Burn 2d6/2d8/3d8","nat19":"","mv":"Vol Normal","attrs":{"D":20,"C":13,"I":3,"P":10,"W":16,"Ch":3},"special":"Immunisé contre les armes non magiques excl.ing fer froid. Feu Blast (recharge 30%) Up pour trois targets within portée Proche subir 5d6/10d6/15d6 (Jet de Chance (Dex) pour moitié)","reaction":"As creator’s orders ou · 2-5 Destructeur · 6-8 Malicieux · 9-12 Exploratoire","num":"#1"},{"fr":"Élémentaire d'Eau","en":"Water Elemental","hd":"5","ca":"17","dv":"5/10/15","attack":"Batter 2d6/2d8/3d6","nat19":"","mv":"Nage Rapide","attrs":{"D":14,"C":20,"I":3,"P":13,"W":16,"Ch":3},"special":"Immunisé contre les armes non magiques excl.ing fer froid. Sur un Nat 18-20 Engulf Automatic Batter dégâts sur Elemental’s tour sauf si contest. de For pour se libérer (victime is drowning et ne peut pas take autre actions). Le GM decides how many targets peut be engulfed à une fois","reaction":"As creator’s orders ou · 2-5 Agressif · 6-8 Reserved · 9-12 Joueur","num":"#1"},{"fr":"Elfe","en":"Elf","hd":"1","ca":"13 (leather)","dv":"1","attack":"Arc 1d8","nat19":"Trauma Missile (1d12)","mv":"Normale","attrs":{"S":10,"D":15,"C":8,"I":10,"P":13,"W":10,"Ch":13,"L":4},"special":"Av. en Dex related rolls, Désav. sur Con related rolls. Trance à la place de sleep","reaction":"2-3 Hostile · 4-5 Prudent · 6-8 Distant · 9-10 Songeur · 11-12 Amical","num":"#3d4"},{"fr":"Ettin","en":"Ettin","hd":"10","ca":"13","dv":"10+3","attack":"Gourdin 2d10","nat19":"","mv":"Dépl. Rapide","attrs":{"S":19,"D":10,"C":15,"I":7,"P":9,"W":12,"Ch":8,"L":10},"special":"Mind attacks affect seulement un head. Sur un fumble, le heads break into violent argument (à la place du usual free attack)","reaction":"2-6 Violent · 7-8 Inamical · 9-10 Confus · 11-12 Aimable","num":"#1d6"},{"fr":"Gueule Emplumée","en":"Feathered Maw","hd":"3","ca":"15","dv":"3+1","attack":"Morsure 1d8+1 et Venimeux Limb Jet de Chance (Con) ou Sans défense pour 1d4 hours","nat19":"Empoisonné Brain: subir un Folie aléatoire","mv":"Vol Rapide","attrs":{"S":14,"D":14,"C":12,"I":3,"P":14,"W":12,"Ch":4,"L":6},"special":". Un thick coat de oil sur la skin helps repel le Maw’s venimeux secretions (adv sur la Jet de Chance)","reaction":"2-5 Hostile · 6-8 Affamé (especially pour dogs ou autre small animaux) 9-10 Méfiant · 11-12 Follow de un distance","num":"#3d6"},{"fr":"Fey Creeper","en":"Fey Creeper","hd":"5","ca":"14","dv":"5","attack":"Morsure 1d10 + maladie","nat19":"Partial Engulf: 2d4 sur Creeper’s tour sauf si contest. de For pour se libérer (pas de action)","mv":"Normale","attrs":{"S":19,"D":11,"C":14,"I":7,"P":10,"W":15,"Ch":4,"L":8},"special":"Maladie 1d3: (i) Pinkscab Palsy, (ii) Black Retch, (iii) Oozy Eye","reaction":"As creator’s orders ou Hostile","num":"#2d4"},{"fr":"Flesh Eating Vines","en":"Flesh Eating Vines","hd":"1","ca":"12","dv":"1","attack":"Crush 1d6+1 + Saisi","nat19":"Paralytic Spore: Jet de Chance (Con) ou 1d8 Dex perte","mv":"Normale","attrs":{"S":14,"D":14,"C":7,"I":2,"P":10,"W":8,"Ch":1,"L":4},"special":"Sense moving creatures within Proche, et recoil de open flames (Vol check résiste)","reaction":"2-12 Vorace","num":"#5d6"},{"fr":"Gargouille","en":"Gargoyle","hd":"3","ca":"15","dv":"3+3","attack":"Morsure 1d12","nat19":"Trauma Tranchant (1d12)","mv":"Vol Rapide","attrs":{"S":14,"D":14,"C":12,"I":3,"P":14,"W":12,"Ch":4,"L":6},"special":". Un natural 1-2 jet d'attaque against un Gargoyle’s enchanted hide shatters le arme (Jet de Chance résiste)","reaction":"As creator’s orders ou · 2-5 Agressif · 6-8 Hésitant · 9-10 Avide · 11-12 Nosy","num":"#1d2"},{"fr":"Cube Gélatineux","en":"Gelatinous Cube","hd":"4","ca":"11","dv":"4+4","attack":"Pseudopode 2d4 + paralysed (Sans défense) pour 1d6 hrs, Jet de Chance (Con) annule paralysis","nat19":"Engulfed: 2d4 sur cible’s tour sauf si contest. de For pour se libérer (ne peut pas take autre actions)","mv":"Escalade Normale","attrs":{"S":18,"D":10,"C":16,"I":2,"P":14,"W":16,"Ch":1,"L":7},"special":"Un Cube dissolves un cadavre dans 1d4 hours, leaving behind seulement metals et autre non organic matter","reaction":"2-5 Vorace · 6-8 Affamé · 9-12 Léthargique","num":"#1"},{"fr":"Fantôme","en":"Ghost","hd":"8","ca":"12","dv":"8","attack":"Toucher 1d4 + vieillissement 3d10 ans (pas de jet de sauvegarde)","nat19":"Double aging, Jet de Chance (Vol) annule le extra","mv":"Fly Normal","attrs":{"I":10,"P":13,"W":17,"Ch":3,"L":9},"special":"Mort-Vivant Incorporel. Immunisé contre les armes non magiques excl. fer froid, eau bénite. Après combat, aged survivors doit make un Jet de Chance (Vol) ou subir un Folie aléatoire. Un victime aged plus than son expected lifespan dies un desiccated husk","reaction":"2-6 Meurtrier · 7-8 Haineux · 9-10 Envious · 11-12 Besotted","num":"#1"},{"fr":"Goule","en":"Ghoul","hd":"3","ca":"13","dv":"3","attack":"Griffe 1d8+1 + Paralysé (Sans défense) pour 2d6 mins (un Jet de Chance (Con) résiste le paralysis)","nat19":"Frenzy: extra Griffe attack","mv":"Climb Normal","attrs":{"S":16,"D":13,"C":12,"I":10,"P":13,"W":14,"Ch":6,"L":6},"special":"Mort-Vivant","reaction":"2-6 Violent · 7-9 Vorace · 10-12 Jaloux. Most Giants are between twelve pour twenty feet tall (although larger variants do exist), massive et frightening humanoids filled avec arrogance, avarice, et ire. Ils are strict carnivores et prefer humans pour cows ou sheep","num":"#2d12"},{"fr":"Géant de Feu","en":"Fire Giant","hd":"14","ca":"17 (armour)","dv":"14+3","attack":"Hammer 4d8","nat19":"","mv":"Normale","attrs":{"S":21,"D":11,"C":17,"I":10,"P":13,"W":14,"Ch":12,"L":14},"special":"Projette boulder, carts, etc jusqu'à portée Très Loin pour 4d6 dégâts. Immunisé contre feu. Foes de 4 HD ou moins doit make un Vol check ou fuir dans terror pour 2d6 rounds. Feu Priests gagne Spells (3, Int 16) Hellblast, Hex de Volcanic Steel, Light of Soliri","reaction":"2-4 Enragé · 5-6 Angry · 7-9 Inamical · 10-12 Haughty","num":"#1d8"},{"fr":"Géant du Givre","en":"Frost Giant","hd":"12","ca":"15 (armour)","dv":"12+4","attack":"Hache 3d8+2","nat19":"","mv":"Normale","attrs":{"S":21,"D":10,"C":16,"I":8,"P":11,"W":14,"Ch":11,"L":12},"special":"Projette boulder, carts, etc jusqu'à portée Très Loin pour 4d6 dégâts. Immunisé contre froid. Les ennemis de 3 DV ou moins font un test Vol ou fuient dans terror pour 2d6 rounds. Elder Chiefs gagne Frost Breath (2) Up pour trois targets dans un zone Proche subir 6d8 dégâts et Saisi (Jet de Chance (Dex) pour moitié, Grab Pour 15)","reaction":"2-5 Hostile · 6-8 Agressif · 9-10 Intéressé · 11-12 Perplexe","num":"#1d10"},{"fr":"Géant des Collines","en":"Hill Giant","hd":"8","ca":"12","dv":"8+2","attack":"Gourdin 2d8+2","nat19":"","mv":"Normale","attrs":{"S":20,"D":8,"C":15,"I":6,"P":9,"W":12,"Ch":8,"L":9},"special":"Projette boulder, carts, etc jusqu'à portée Très Loin pour 3d6 dégâts. Olfactory sense like un dog. Foes de 2 HD ou moins doit make un Vol check ou fuir dans terror pour 2d6 rounds","reaction":"2-7 Violent · 8-10 Affamé · 11-12 Curieux","num":"#1d12"},{"fr":"Géant des Tempêtes","en":"Storm Giant","hd":"16","ca":"18 (armour)","dv":"16+6","attack":"Trident 3d10+2","nat19":"Lightning Bolt","mv":"Normale","attrs":{"S":22,"D":12,"C":18,"I":14,"P":15,"W":16,"Ch":14,"L":16},"special":"Projette boulder, carts, etc jusqu'à portée Très Loin pour 5d6 dégâts. Immunisé contre foudre. Foes de 5 HD ou moins doit make un Vol check ou fuir dans terror pour 2d6 rounds. Spells (3, Int 18) Lightning Bolt, Thunderous Invocation, Conclave of Wind and Sky","reaction":"2-4 Destructeur · 5-6 Inamical · 7-9 Reserved · 10-12 Questioning","num":"#1d6"},{"fr":"Gobelin","en":"Goblin","hd":"1","ca":"11","dv":"1d4","attack":"Morsure 1d6","nat19":"Frenzy: attaque bonus : Morsure attack","mv":"Normale","attrs":{"S":7,"D":14,"C":10,"I":9,"P":11,"W":8,"Ch":8,"L":3},"special":"Av. en stealth related checks. Près de Aveugle dans lumière du soleil","reaction":"2-6 Hostile · 7-8 Unkind · 9-10 Withdrawn · 10-12 Intéressé","num":"#4d6"},{"fr":"Gnoll","en":"Gnoll","hd":"2","ca":"13","dv":"2","attack":"Griffe 1d8","nat19":"","mv":"Dépl. Rapide","attrs":{"S":13,"D":13,"C":10,"I":9,"P":13,"W":9,"Ch":8,"L":5},"special":"","reaction":"2-5 Sadique · 6-8 Affamé · 9-10 Heedful · 11-12 Rêverie Rituelle","num":"#4d6"},{"fr":"Golem de Chair","en":"Flesh Golem","hd":"7","ca":"14","dv":"7+3","attack":"Poings (2) 2d6","nat19":"Renversé et bonus Poing attack","mv":"Normale","attrs":{"S":18,"D":10,"C":18,"P":10,"L":9},"special":"50% Résistance à la Magie et 50% chance de negating non magique arme touche. Foudre accorde Hunger pour Blood à la place de damaging le Golem. Quand Blessé gagne Off Turn Attacks but perd 1d6 chaque round jusqu'à torn apart","reaction":"As creator’s orders","num":"#1"},{"fr":"Golem de Fer","en":"Iron Golem","hd":"15","ca":"20","dv":"15+7","attack":"Poings (2) 2d10","nat19":"","mv":"Normale","attrs":{"S":22,"D":12,"C":24,"P":15,"L":15},"special":"90% Résistance à la Magie et 50% chance de negating non magique arme touche. Off Turn Attacks. Immunisé contre feu. Noxious Souffle portée Proche, targets dans un zone Proche subir 10d6 dégâts (Jet de Chance (Con) pour moitié), Recharge quand Blessé","reaction":"As creator’s orders","num":"#1"},{"fr":"Golem de Pierre","en":"Stone Golem","hd":"11","ca":"16","dv":"11+3","attack":"Poings (2) 2d8","nat19":"","mv":"Normale","attrs":{"S":22,"D":12,"C":24,"P":15,"L":15},"special":"60% Résistance à la Magie except Bending the Stone (cause 6d8 dégâts, une fois seulement). 50% chance de negating non magique arme touche. Si both Poing attacks toucher le cible is Crushed Jet de Chance (Con) ou Côtes Brisées","reaction":"As creator’s orders. goleMS","num":"#1"},{"fr":"Green Slime","en":"Green Slime","hd":"2","ca":"10","dv":"2","attack":"Fling Goop Special","nat19":"Head Strike, see below","mv":"Normale","attrs":{"S":13,"D":13,"C":13,"I":2,"P":12,"W":16,"Ch":1,"L":5},"special":"Immobile Metal ou organic matter touched turns into Green Slime dans un round (Jet de Chance (Con) résiste). Si un limb ou object becomes slime, cela attempts pour spread chaque round, eg hand, then arm, then torso (fatal). Green Slime is détruite par lumière du soleil, feu, extreme froid ou Cleansing Charm. Si dropping de above, 50% chance de striking le head/torso (Jet de Chance (Con) ou die, adv si helm)","reaction":"2-12 Faim aveugle","num":"#1"},{"fr":"Griffon","en":"Griffon","hd":"4","ca":"14","dv":"4","attack":"Griffes (2) 1d6 et Morsure 2d4","nat19":"","mv":"Fly Very","attrs":{"S":19,"D":15,"C":16,"I":2,"P":14,"W":13,"Ch":8,"L":7},"special":", Fast. Avantage sur sight based Perception checks. Si le cible is surprised, attack avec advantage et peut carry away son victime (contest. de For pour résister, pas de action)","reaction":"2-4 Hostile · 5-6 Affamé (especially pour dogs, mules, horses) 7-8 Inamical · 9-10 Aux aguets · 11-12 Intrigué","num":"#2d6"},{"fr":"Hag","en":"Hag","hd":"6","ca":"13","dv":"6","attack":"Griffes (2) 1d6+1","nat19":"Cursed: perd 1 point de Chance","mv":"Normale","attrs":{"S":19,"D":15,"C":10,"I":14,"P":14,"W":15,"Ch":4,"L":9},"special":"Résistance à la Magie 30%. Spells (2/ 4/6, Int 18) A Wisp Unseen, Shadows \\u0026amp; Dust, Flesh to Stone, Gaze of Beguilement, Bestial Communion, Hex de Volcanic Steel, Mask of Many Faces, Thrice Bound Curse","reaction":"2-5 Meurtrier · 6-8 Malveillant · 9-10 Enticed · 11-12 Conspirateur","num":"#1d3"},{"fr":"Hammer Snail","en":"Hammer Snail","hd":"5","ca":"16","dv":"5","attack":"Stalks (5) 1d4+2","nat19":"Trauma Contondant (1d8+4)","mv":"Escalade Normale","attrs":{"S":12,"D":7,"C":15,"I":3,"P":8,"W":17,"Ch":1,"L":8},"special":"Hammer Snails attack le same cible avec tous cinq hammer stalks jusqu'à inconscient avant selecting another cible (ou tenderising le cadavre into un pulpy mass qui cela consumes)","reaction":"2-4 Belligerent · 5-6 Affamé · 7-8 Careful · 9-10 Curieux · 11-12 Receptive","num":"#1d4"},{"fr":"Harpie","en":"Harpy","hd":"3","ca":"12","dv":"3","attack":"Serres (2) 1d6 ou Baiser (spécial)","nat19":"Unnatural Song : Jet de Chance (Vol) ou Folie aléatoire","mv":"Vol Rapide","attrs":{"S":9,"D":15,"C":10,"I":10,"P":12,"W":13,"Ch":15,"L":6},"special":". Harpy Song (1) Jet de Chance (Vol) ou ne peut pas agir et doit se déplacer vers la Harpie (même si suicidaire) tant qu'elle chante. La victime into un rage si prevented. Kiss cause 1d6 perte de For et le cible is Étourdi (Jet de Chance (Vol) annule le stun). Si réduit àour zero Pour le Harpy devours le victime’s heart le following round (dead)","reaction":"2-5 Violent · 6-8 Affamé · 9-10 Curieux · 11-12 Épris. iety de opponents. Certains examples are fournited below","num":"#2d6"},{"fr":"Archer","en":"Archer","hd":"1","ca":"11 (leather)","dv":"1","attack":"Arc 1d8","nat19":"Trauma Missile (1d12)","mv":"Normale","attrs":{"S":10,"D":11,"C":10,"I":10,"P":12,"W":10,"Ch":10,"L":4},"special":"","reaction":"2-3 Hostile · 4-5 Prudent · 6-8 Civil · 9-10 Intéressé · 11-12 Amical","num":"#4d6"},{"fr":"Assassin","en":"Assassin","hd":"4","ca":"14","dv":"4","attack":"Épée courte 1d6+2","nat19":"Poison Blade: Jet de Chance (Con) ou death","mv":"Normale","attrs":{"S":13,"D":17,"C":13,"I":14,"P":14,"W":13,"Ch":13,"L":9},"special":"Av. en stealth checks, Rogue talents Skirmisher, Backstab, Finisher. 1d3 doses de Major Poison (p.226). Tricks (4) Rapid Dose, Hidden Blade, Smoke Bomb, Choking Dust, Flash Powder","reaction":"As hirer’s orders","num":"#1"},{"fr":"Bandit","en":"Bandit","hd":"1","ca":"11 (leather)","dv":"1","attack":"Lance 1d6+1","nat19":"Trauma Tranchant (1d12)","mv":"Normale","attrs":{"S":12,"D":11,"C":11,"I":10,"P":10,"W":10,"Ch":10,"L":4},"special":"","reaction":"2-6 Intimidant · 7-8 Avide · 9-10 Civil · 11-12 Sociable","num":"#3d6"},{"fr":"Berserker","en":"Berserker","hd":"1","ca":"13 (heavy hide)","dv":"1","attack":"Hache 1d8+1","nat19":"Trauma Tranchant (1d8+4)","mv":"Normale","attrs":{"S":13,"D":10,"C":13,"I":8,"P":9,"W":12,"Ch":10,"L":4},"special":"+2 bonus sur jets d'attaque et advantage sur Moral checks","reaction":"2-6 Hostile · 7-8 Querelleur · 9-10 Méfiant · 11-12 Civil","num":"#3d8"},{"fr":"Roturier","en":"Commoner","hd":"1","ca":"10","dv":"1d6","attack":"Couteau 1d4","nat19":"Trauma Tranchant (1d10)","mv":"Normale","attrs":{"S":10,"D":10,"C":10,"I":10,"P":10,"W":10,"Ch":10,"L":4},"special":"","reaction":"2-3 Opposé · 4-5 Inamical · 6-8 Civil · 9-10 Amical · 11-12 Hospitalier","num":"#1d6"},{"fr":"Cultiste","en":"Cultist","hd":"1","ca":"11","dv":"1","attack":"Couteau 1d4","nat19":"Trauma Tranchant (1d10)","mv":"Normale","attrs":{"S":10,"D":10,"C":10,"I":13,"P":10,"W":13,"Ch":9,"L":4},"special":"Certains rare members peut have Spells (2, Int 16) Gabbling of the Jade Moon, Dark Slumber, Brain Burst, Gaze of Beguilement","reaction":"2-5 Hostile · 6-8 Trompeur · 9-10 Jaloux · 11-12 Conspirateur","num":"#3d10"},{"fr":"Champion","en":"Champion","hd":"4","ca":"14 (scale)","dv":"4","attack":"Espadon 1d12+3","nat19":"Trauma Tranchant (1d8+4)","mv":"Normale","attrs":{"S":16,"D":10,"C":14,"I":10,"P":12,"W":13,"Ch":10,"L":7},"special":"À le GM’s option peut gagne un random Heavy ability (p.168)","reaction":"2-4 Violent · 5-6 Insulting · 7-8 Civil · 9-10 Curieux · 11-12 Cordial","num":"#1"},{"fr":"Garde","en":"Guard","hd":"1","ca":"14 (chain, shield)","dv":"1","attack":"Épée 1d8+1","nat19":"Trauma Tranchant (1d10+2) ou Désarmer","mv":"Normale","attrs":{"S":13,"D":10,"C":12,"I":10,"P":12,"W":10,"Ch":10,"L":4},"special":"","reaction":"2-3 Hostile · 4-6 Difficile · 7-9 Civil · 10-12 Serviable","num":"#1d6+4"},{"fr":"Chevalier","en":"Knight","hd":"2","ca":"16 (plate, shield)","dv":"2","attack":"Lance 2d4+1","nat19":"Impale, push, ou prone","mv":"Normale","attrs":{"S":14,"D":10,"C":13,"I":10,"P":12,"W":10,"Ch":10,"L":5},"special":"Usually comes avec un Warhorse","reaction":"2-3 Hostile · 4-6 Civil · 7-9 Courtois · 10-12 Affable","num":"#2d4"},{"fr":"Foule Humaine","en":"Human Mob","hd":"4","ca":"10","dv":"4","attack":"Fourches 1d10","nat19":"","mv":"Normale","attrs":{"S":15,"D":6,"C":10,"I":7,"P":10,"W":10,"Ch":7,"L":5},"special":"Swarm (p.170). Un rousing speech ou display de overwhelming force might disperse ou delay un mob (GM’s call)","reaction":"2-6 En émeute! · 7-9 Hostile · 10-12 Moqueur et perturbateur","num":"#1"},{"fr":"Sorcier","en":"Sorcerer","hd":"5","ca":"12","dv":"5","attack":"Épée 1d8","nat19":"Le Sorcerer triggers un DDM effect","mv":"Normale","attrs":{"S":9,"D":14,"C":10,"I":16,"P":14,"W":15,"Ch":10,"L":8},"special":"Av. en résistance mind effects. Spells (5) Crush of the Warp, Hellblast, Mask of Many Faces, Undead Servant, Conjure Entity, Light of Soliri, Arcane Aegis","reaction":"2-4 Malveillant · 5-7 Reserved · 8-9 Civil · 10-12 Inquisiteur","num":"#1"},{"fr":"Hydre","en":"Hydra","hd":"13","ca":"15","dv":"13","attack":"Morsure (9) 1d8+1","nat19":"","mv":"Normale","attrs":{"S":22,"D":8,"C":20,"I":3,"P":14,"W":15,"Ch":3,"L":13},"special":"Régén. (1d8, argent, feu). Off Turn Attacks. Severed heads par virtue de Major Exploits ou similar grow back dans un round sauf si le stump is sealed avec feu, foudre, ou acide","reaction":"2-6 Destructeur · 7-9 Affamé · 10-12 Annoyed","num":"#1"},{"fr":"Traqueur Invisible","en":"Invisible Stalker","hd":"8","ca":"16","dv":"8","attack":"“Morsure” 2d8","nat19":"Special","mv":"Vol Normal","attrs":{"S":18,"D":19,"C":15,"I":15,"P":19,"W":15,"Ch":7,"L":9},"special":". Invisible. Résistance à la Magie 50%. Sur un Nat 19 le cible et Stalker disappear pour la void pour finish son duel. Si le Stalker is defeated, le cible reappears","reaction":"As creator’s orders ou Hostile","num":"#1"},{"fr":"Wyrm des Lacs (Lourd)","en":"Lake Wyrm","hd":"10","ca":"16","dv":"10","attack":"Morsure 2d10+1","nat19":"","mv":"Nage Rapide","attrs":{"S":19,"D":16,"C":18,"I":3,"P":13,"W":13,"Ch":6,"L":12},"special":". Traits Lourds. Steam Souffle portée Loin, targets dans un zone Proche subir 10d6 dégâts (Jet de Chance (Dex) pour moitié), recharge quand Blessé","reaction":"2-4 Violent · 5-7 Affamé · 8-9 Indifférent · 10-12 Attiré","num":"#1"},{"fr":"Sangsue Projetée","en":"Projectile Leech","hd":"1","ca":"10","dv":"1","attack":"Morsure 1d3 + Blood Drain","nat19":"Latches onto le cible’s face causing un Eye Injury (Jet de Chance (Con) résiste, adv si helm)","mv":"Leap Proche","attrs":{"S":10,"D":10,"C":16,"I":2,"P":14,"W":8,"Ch":3,"L":3},"special":". Immunisé contre contondant dégâts. Blood Drain sur cible’s tour contest. de Pour (S16) pour se libérer (pas de action) ou 1d4+1 dég + 1 Con perte. Un handful de salt, feu, ou acide automatiquement cause le leech pour curl up et die","reaction":"2-12 Affamé!","num":"#5d4"},{"fr":"Liche","en":"Lich","hd":"15","ca":"18","dv":"15","attack":"Toucher 1d12 + Paralysis (Sans défense) 2d6 rounds (Jet de Chance (Vol) à disad résiste)","nat19":"Impart Sorcery: targets rolls pour un DDM effect","mv":"Vol Normal","attrs":{"S":14,"D":14,"C":12,"I":20,"P":20,"W":20,"Ch":14,"L":15},"special":". Boss Traits. Mort-Vivant. Résistance à la Magie 50%. Spells (5) As GM determines but inclus au moins un Old Magic Grimoire spell, tirer 1d4 : (i) Unchain le World Eater, (ii) Sign de Subjugation, (iii) Word de Ending, (iv) Forbidden Wish","reaction":"2-3 Hostile · 4-5 Haineux · 6-8 Interrogative · 9-10 Civil · 10-12 Captivated","num":"#1"},{"fr":"Lézard Géant","en":"Giant Lizard","hd":"3","ca":"15","dv":"3+4","attack":"Morsure 2d6","nat19":"Acide Crachat: 1d6 dégâts pour 1d6 rounds (action pour clean off)","mv":"Dépl. Rapide","attrs":{"S":17,"D":10,"C":14,"I":2,"P":8,"W":10,"Ch":3,"L":6},"special":"","reaction":"2-4 Furieux · 5-6 Affamé · 7-9 Menaçant · 10-12 Attentif. General Lycanthrope traits are detailed sur p.170 Three example creatures appear below","num":"#2d6"},{"fr":"Ours-Garou","en":"Werebear","hd":"9","ca":"13","dv":"9","attack":"Morsure 2d10","nat19":"Un Bear comes pour la lycan’s aid (si possible)","mv":"Dépl. Rapide","attrs":{"S":19,"D":10,"C":18,"I":10,"P":15,"W":15,"Ch":7,"L":10},"special":". Shift form (action). Régén. (tous dégâts, argent, feu). Après combat, anyone injured doit make un Jet de Chance (Con) ou subir Lycanthropy","reaction":"2-6 Destructeur · 7-8 Agressif · 9-10 Sour · 11-12 Prudent","num":"#1"},{"fr":"Rat-Garou","en":"Wererat","hd":"3","ca":"12","dv":"3","attack":"Morsure 2d4","nat19":"Un Giant Rat comes pour la lycan’s aid (si possible)","mv":"Escalade Normale","attrs":{"S":14,"D":18,"C":10,"I":13,"P":14,"W":10,"Ch":8,"L":6},"special":". Shift form (action). Régén. (tous dégâts, argent, feu). Après combat, anyone injured doit make un Jet de Chance (Con) ou subir Lycanthropy","reaction":"2-3 Hostile · 4-5 Inamical · 6-8 Heedful · 9-10 Avide · 11-12 Curieux","num":"#1"},{"fr":"Loup-Garou","en":"Werewolf","hd":"6","ca":"13","dv":"6+4","attack":"Morsure 2d6","nat19":"Un Dire Wolf comes pour la lycan’s aid (si possible)","mv":"Dépl. Rapide","attrs":{"S":18,"D":14,"C":14,"I":10,"P":15,"W":13,"Ch":8,"L":8},"special":". Shift form (action). Régén. (tous dégâts, argent, feu). Après combat, anyone injured doit make un Jet de Chance (Con) ou subir Lycanthropy","reaction":"2-5 Violent · 6-8 Affamé · 9-10 Desirous · 11-12 Intrigué","num":"#1"},{"fr":"Mammoth","en":"Mammoth","hd":"11","ca":"13","dv":"11+3","attack":"Gore 3d6+2","nat19":"","mv":"Dépl. Rapide","attrs":{"S":21,"D":7,"C":20,"I":3,"P":12,"W":13,"Ch":8,"L":11},"special":". Av. vs froid effects. Charge (1) Doit déplacement Loin, dégâts doublés + Trauma Contondant (1d8+4)","reaction":"2-5 Furieux · 6-8 Agressif · 9-10 Surly · 11-12 Indifférent","num":"#1d4"},{"fr":"Manticore","en":"Manticore","hd":"7","ca":"13","dv":"7","attack":"Griffes (2) 1d6 et Morsure 1d10 et 1d6 Tail Spikes 1d6+1","nat19":"Wing Batter: Jet de Chance (Con) ou Étourdi","mv":"Vol Rapide","attrs":{"S":19,"D":14,"C":18,"I":8,"P":10,"W":12,"Ch":8,"L":9},"special":"","reaction":"2-4 Hostile · 5-6 Combatif · 7-9 Withdrawn · 10-12 Intéressé","num":"#1"},{"fr":"Méduse","en":"Medusa","hd":"8","ca":"13","dv":"8","attack":"Arc 1d8+1 et Snake Hair 1d3 + Poison","nat19":"Jet de Chance ou l'arme/armure est pétrifiée","mv":"Normale","attrs":{"S":10,"D":15,"C":12,"I":15,"P":13,"W":15,"Ch":8,"L":9},"special":"Petrifying Regard Chaque round que un combatant does pas avert son gaze (Aveugle), Jet de Chance (Con) ou Pétrifié. Poison 2d6 + 1d6 perte de For, Jet de Chance (Con) pour moitié","reaction":"2-4 Meurtrier · 5-6 Traître · 7-9 Exigeant · 10-12 Épris","num":"#1"},{"fr":"Merscine","en":"Merscine","hd":"3","ca":"12","dv":"3","attack":"Morsure 2d6","nat19":"Un Giant Shark comes pour la Merscine’s aid (si possible)","mv":"Nage Rapide","attrs":{"S":16,"D":16,"C":12,"I":8,"P":10,"W":13,"Ch":10,"L":8},"special":". Un Merscine frenzies quand un cible becomes Blessé, attacking eux si possible et ignoring Moral. Frenzied Merscine kill inconscient victims avec son prochain action si le body is pas recovered","reaction":"2-6 Hostile · 7-9 Affamé · 10-12 Inamical","num":"#2d4"},{"fr":"Mimic","en":"Mimic","hd":"5","ca":"14","dv":"5","attack":"Morsure 1d10+1 et Tendrils (4) 1d6","nat19":"Strong glue; disad sur Pour check","mv":"Escalade Normale","attrs":{"S":18,"D":10,"C":16,"I":8,"P":13,"W":15,"Ch":4,"L":11},"special":". Résistance à la Magie 50%. Off Turn Attacks. Anything touching le Mimic sticks pour cela, contest. de For pour se libérer (action). Si réduit àour zero points de vie, does pas die but enters un dormant state pour 1d4 days (sauf si set sur feu). Climb Proche","reaction":"As creator’s orders ou Faim aveugle","num":"#1"},{"fr":"Minotaure Infernal","en":"Infernal Minotaur","hd":"5","ca":"15","dv":"5+4","attack":"Hache 2d8","nat19":"","mv":"Déplacement Loin","attrs":{"S":19,"D":14,"C":19,"I":6,"P":14,"W":15,"Ch":7,"L":8},"special":"Charge (1) , as Hache + Trauma Tranchant (1d8+4)","reaction":"2-5 Enragé · 6-8 Vorace · 9-10 Agressif · 11-12 Boisterous","num":"#1d8"},{"fr":"Minotaure Infernal","en":"Infernal Minotaur","hd":"5","ca":"15","dv":"5+4","attack":"Hache 2d8","nat19":"","mv":"Normale","attrs":{"S":19,"D":14,"C":19,"I":6,"P":14,"W":15,"Ch":7,"L":8},"special":"Immunisé contre les armes non magiques (excl. fer froid, eau bénite). Résistance à la Magie 33%. Roar (1) as Glimpse le True Gods (Great Success)","reaction":"2-8 Hostile · 9-12 Malveillant","num":"#1"},{"fr":"Singe Mangeur d'Hommes","en":"Man-Eating Monkey","hd":"1","ca":"13","dv":"1d4","attack":"Morsure 1d6","nat19":"Disarmed","mv":"Leap Proche","attrs":{"S":10,"D":17,"C":10,"I":4,"P":13,"W":8,"Ch":8,"L":3},"special":". Quand un cible becomes Blessé, tous Monkeys within portée Proche frenzy, ignoring autre les ennemis en attaque le injured (ils will risk free attacks pour reposition). Sur un Crit, le Monkey climbs onto le back du cible et sinks son fangs into son neck, knocking eux À terre (Contest. de Pour pour stand, pas de action)","reaction":"2-5 Hostile · 6-8 Famished · 9-10 Peaceful · 11-12 Frolicsome","num":"#5d6"},{"fr":"Momie","en":"Mummy","hd":"7","ca":"13","dv":"7","attack":"Poing 1d12 + Mummy Rot","nat19":"Scarab Beetles surge out du Mummy (as Rat Swarm)","mv":"Normale","attrs":{"S":19,"D":8,"C":16,"I":4,"P":10,"W":14,"Ch":3,"L":9},"special":"Mort-Vivant. Double dégâts de feu. Mummy Rot cause 1 Con perte et prevents tous healing jusqu'au adventure ends (Jet de Chance (Con) résiste le healing prevention seulement). Cleansing Charm aussi retires le curse","reaction":"Ordres du créateur","num":"#1"},{"fr":"Gelée Ocre","en":"Ochre Jelly","hd":"8","ca":"11","dv":"8","attack":"Pseudopode 2d8","nat19":"Jelly splits into deux (diviser par deux remaining pv)","mv":"Normale","attrs":{"S":18,"D":10,"C":16,"I":2,"P":13,"W":16,"Ch":1,"L":9},"special":"Immunisé contre feu, divise into deux si subject pour un magique froid attack. Jellies absorb inconscient victims avec son prochain action si le body is pas recovered (dead)","reaction":"2-12 Faim aveugle","num":"#1d3"},{"fr":"Pieuvre Géante","en":"Giant Octopus","hd":"17","ca":"15","dv":"17+3","attack":"Morsure 2d8 et Tentacules (8) 1d10","nat19":"","mv":"Nage Rapide","attrs":{"S":23,"D":14,"C":22,"I":3,"P":10,"W":15,"Ch":1,"L":16},"special":". Swallowed 3d10 sur Octopus’ tour, victime peut seulement use action pour make small arme attacks (vs AC 10). Si severely injured will flee, releasing un Loin zone cloud de black ink (Près de Aveugle) et regurgitate n'importe quel swallowed les ennemis","reaction":"2-4 Destructeur · 5-8 Insatiable hunger · 9-12 Inconscient OGRE Ogres are nine foot tall lesser giants; powerfully built, brutish man eaters avec elongated canines et pointed ears. Ils are de low intelligence, vicious, et easy pour anger","num":"#1"},{"fr":"Ogre","en":"Ogre","hd":"4","ca":"12","dv":"4+3","attack":"Gourdin 2d8","nat19":"","mv":"Dépl. Rapide","attrs":{"S":19,"D":8,"C":15,"I":6,"P":7,"W":8,"Ch":7,"L":7},"special":"Meurtrier rage quand Blessé: free attack against tous les ennemis dans Corps à corps portée","reaction":"2-6 Enragé · 7-8 Affamé · 9-10 Grossier · 11-12 Confus","num":"#2d4"},{"fr":"Ogre","en":"Ogre","hd":"7","ca":"15","dv":"7+4","attack":"Épée 2d8","nat19":"","mv":"Déplacement Loin","attrs":{"S":19,"D":10,"C":15,"I":16,"P":14,"W":15,"Ch":10,"L":9},"special":"Meurtrier rage quand Blessé: free attack against tous les ennemis dans Corps à corps portée. Switch between humanoid forms (action). Spells (5) Dark Slumber, Gaze of Beguilement, Blast de Frozen Ruin, Wings du Raven King, Shadows \\u0026amp; Dust","reaction":"2-6 Hostile · 7-8 Trompeur · 9-10 Jaloux · 11-12 Curieux","num":"#1"},{"fr":"Limon Conscient","en":"Sentient Ooze","hd":"6","ca":"12","dv":"6","attack":"Vrille acide 2d6 + 1d4 Int perte (Jet de Chance (Vol) annule Int perte)","nat19":"Emotion Burst","mv":"Climb Proche","attrs":{"S":18,"D":16,"C":16,"I":4,"P":14,"W":16,"Ch":1,"L":8},"special":"Half dégâts de bladed weapons et dégâts doublés de feu. Emotion Burst portée Très Loin, Jet de Chance (Vol) ou emotion ou Folie, recharge moitié hour. Reac 2-12 Faim aveugle. OOZE, SENTIENT Sentient Oozes come dans un various forms, but are invariably carnivorous flesh melters. Their amorphous mass peut flatten pour crawl under doors ou puff jusqu'au size de un small wagon. Most emerge de subterranean pools, fissures, ou Veil ruptures. Oozes track son prey par various methods inclus scent, body heat, et vibration. Ils fall into stasis like hibernation si starved, roused pour wakefulness si un warm body comes within portée Proche. Roll 1d10 pour determine un particular ooze’s special trait. SENTIENT OOZE #1 ou 2d6 (spawn pool) AC 11 HD 5 Acide Vrille acide 1d12 Nat 19 Arme endommagée -2 jets d'attaque jusqu'à réparation S17 D10 C16 I2 P14 W16 Ch1 L6. Half dégâts de bladed weapons et dégâts doublés de feu. Climb Proche","reaction":"2-12 Faim aveugle","num":"#1"},{"fr":"Ours-Hibou","en":"Owlbear","hd":"6","ca":"13","dv":"6+3","attack":"Griffes (2) 1d6+2 et Morsure 2d6","nat19":"Limb torn off (Jet de Chance (Dex) résiste","mv":"Dépl. Rapide","attrs":{"S":19,"D":12,"C":16,"I":3,"P":10,"W":15,"Ch":4,"L":8},"special":"Si les deux Griffes touchent, étreinte d'ours: Jet de Chance (Con) ou Côtes Brisées. Sur un Critical toucher le Owlbear explodes into extreme violence causing 20 dégâts","reaction":"2-6 Enragé · 7-9 Violent · 10-11 Agressif · 12 Repu. · 5 Fast Flowing Moves Loin et peut leap jusqu'à portée Proche. Never subit un attack pour leaving melee portée. · 6 Psi Shriek Quand Blessé unleashes un brain baking psychic attack: portée Proche, Jet de Chance (Vol) ou Folie. · 7 Glue Membrane Peut cause anything que touches cela pour stick pour cela (Saisi). · 8 Oozifier Quand un living cible is toucher, Jet de Chance (Con) ou un random limb se transforms into goo que merges avec le ooze. · 9 Explosif Ooze swells larger et larger quand damaged, then explodes à zéro PV:","num":"#1"},{"fr":"Ver Pourpre","en":"Purple Worm","hd":"20","ca":"17","dv":"20","attack":"Morsure 3d12+3 et Dard Poison Jet de Chance (Con) ou die","nat19":"","mv":"Fouissement Normal","attrs":{"S":24,"D":8,"C":24,"I":3,"P":14,"W":15,"Ch":2,"L":16},"special":"Off Turn Attacks. Tremor Sense, Echolocation. Swallowed 3d10 sur Worm’s tour, victime peut seulement use action pour make small arme attacks (vs AC 10). Si severely injured will flee, regurgitating n'importe quel swallowed les ennemis","reaction":"2-12 Faim aveugle! Run! RAT, GIANT Giant Rats are about le size de un large cat. Ils are often found dans sewers et lurking dans forests à proximité civilization. Consult le Bones (likely) pour determine whether ils carry un random maladie","num":"#1"},{"fr":"Rat Géant","en":"Giant Rat","hd":"1","ca":"11","dv":"1d4","attack":"Bites 1d3 + maladie","nat19":"Another Giant Rat comes pour cette Rat’s aid (si possible)","mv":"Escalade Normale","attrs":{"S":3,"D":14,"C":8,"I":2,"P":13,"W":6,"Ch":4,"L":3},"special":". Menaçant un Giant Rat avec feu peut keep cela à bay pour un short time (Vol check résiste). Après combat, anyone injured doit make un Jet de Chance (Con) ou subir un random maladie","reaction":"2-3 Vorace! · 4-6 Hostile · 7-8 Steady · 9-10 Scared · 11-12 Attiré","num":"#5d4"},{"fr":"Crocodile Géant","en":"Giant Crocodile","hd":"14","ca":"13","dv":"14","attack":"Griffes (2) 2d6 et Morsure 2d10+2","nat19":"","mv":"Fly Very","attrs":{"S":23,"D":13,"C":20,"I":2,"P":14,"W":16,"Ch":10,"L":14},"special":", Loin. Si le cible is surprised, attack avec advantage et peut carry away son victime (contest. de For pour résister, pas de action)","reaction":"2-4 Hostile · 5-8 Vorace (especially pour horses) 9-10 Curieux · 11-12 Unaware","num":"#1"},{"fr":"Rock Grinder","en":"Rock Grinder","hd":"6","ca":"15","dv":"6","attack":"Griffes (4) 1d4+3","nat19":"Mandibles: Roll 1d20 sur la Injuries \\u0026amp; Setbacks Table","mv":"Fouissement Normal","attrs":{"S":19,"D":10,"C":16,"I":3,"P":11,"W":12,"Ch":4,"L":8},"special":". Tremorsense, sense metals","reaction":"2-5 Violent · 6-8 Affamé pour metals · 9-10 Exploratoire · 11-12 Passive","num":"#2d4"},{"fr":"Roper","en":"Roper","hd":"11","ca":"18","dv":"11","attack":"Morsure 3d8+1 et Tendrils (6) portée Loin, Poison: 1d4 Pour perte (Chance) Con jet de sauvegarde pour moitié + pulled into Corps à corps + Saisi","nat19":"Désarmer et arme tossed behind le Roper","mv":"Dépl. Lent","attrs":{"S":19,"D":7,"C":18,"I":4,"P":13,"W":18,"Ch":5,"L":11},"special":". Slicing off un tendril offers seulement brief respite; 50% chance cela regrows prochain tour. Chameleonic: Per (Det) Great Success nécessiteed pour spot si motionless among stalagmites","reaction":"2-12 Faim aveugle","num":"#1"},{"fr":"Monstre de Rouille","en":"Rust Monster","hd":"2","ca":"14","dv":"2+4","attack":"Morsure 1d3 et Antennae Special","nat19":"À terre et Saisi","mv":"Normale","attrs":{"S":13,"D":10,"C":13,"I":3,"P":16,"W":18,"Ch":9,"L":5},"special":"Antennae touche tour metal objects pour rust (détruite) care de un fast acting chemical reaction, tirer 1d6 : (i-iii) piece de battle gear, (iv-v) armure, (vi) coin pouch. Magic items are rendered unusable jusqu'à réparation à la place de being détruite","reaction":"2-3 Hostile · 5-7 Famished · 8-10 Interest piqued · 11-12 Docile","num":"#1d6"},{"fr":"Scorpion Géant","en":"Giant Scorpion","hd":"6","ca":"15","dv":"6","attack":"Griffes (2) 1d8 et Dard 1d4 + Poison: 1d6 Con perte, Jet de Chance (Con) pour moitié","nat19":"Griffe Crush: 2d6 sur victime’s tour sauf si contest. de For pour se libérer (action)","mv":"Normale","attrs":{"S":19,"D":13,"C":15,"I":1,"P":10,"W":14,"Ch":3,"L":8},"special":"","reaction":"2-5 Destructeur · 6-8 Affamé · 9-10 Guarded · 11-12 Indifférent","num":"#1d6"},{"fr":"Scroach","en":"Scroach","hd":"4","ca":"14","dv":"4","attack":"Dard 1d10 + Poison: Jet de Chance (Con) ou random limb paralysed pour 1d4 days","nat19":"Trauma Tranchant (1d10+2)","mv":"Normale","attrs":{"S":13,"D":14,"C":10,"I":3,"P":10,"W":10,"Ch":4,"L":6},"special":"Un humanoid avec tous limbs paralysed is eaten alive, ou has eggs laid dans eux (hatch dans 4d6 hours et consume le host)","reaction":"2-5 Hostile · 6-8 Eager pour feast · 9-10 Méfiant · 11-12 Confus","num":"#1d10"},{"fr":"Serpent Géant","en":"Giant Serpent","hd":"5","ca":"13","dv":"5","attack":"Morsure 1d10 + Poison","nat19":"","mv":"Normale","attrs":{"S":19,"D":16,"C":13,"I":3,"P":10,"W":12,"Ch":5,"L":8},"special":"GM decides le Poison ou tirer 1d20 sur la Poison table p.226","reaction":"2-6 Violent · 7-9 Vorace · 10-12 Curieux","num":"#1d6"},{"fr":"Hraask","en":"Hraask","hd":"2","ca":"14","dv":"2+2","attack":"Morsure 1d6 + Poison: 1d3 Vol perte, Jet de Chance (Con) résiste le Vol perte","nat19":"Hypnotic Regard: cible Étourdi (Jet de Chance (Vol) résiste)","mv":"Normale","attrs":{"S":12,"D":13,"C":10,"I":10,"P":12,"W":10,"Ch":9,"L":5},"special":"Empoisonné victims réduit àour zero Vol go into un trance like, suggestible state pour 1d6 hours, even pour la point de committing suicide","reaction":"2-5 Hostile · 6-8 Malveillant · 9-10 Avide · 11-12 Prudent","num":"#4d4"},{"fr":"Ssurloc","en":"Ssurloc","hd":"6","ca":"16","dv":"6+3","attack":"Épée 2d6 + Poison: Jet de Chance (Con) ou paralysed (Sans défense) pour 1d3 hours","nat19":"Tail Fouet: 1d8 dégâts et renversé","mv":"Normale","attrs":{"S":18,"D":16,"C":14,"I":10,"P":11,"W":13,"Ch":10,"L":8},"special":"","reaction":"2-6 Meurtrier · 7-9 Agressif · 10-12 Distant","num":"#2d4"},{"fr":"Razkarrt","en":"Razkarrt","hd":"9","ca":"18","dv":"9+4","attack":"Morsure 1d10 + Poison: 1d8 Vol perte, Jet de Chance (Con) réduit de moitié le Vol perte","nat19":"Psychic Stab: as Brain Burst","mv":"Normale","attrs":{"S":12,"D":19,"C":14,"I":18,"P":16,"W":18,"Ch":14,"L":10},"special":"Empoisonné victims réduit àour zero Vol go into un trance like, suggestible state pour 1d6 hours, even pour la point de committing suicide. Peut switch between human, noble et hybrid forms (action). Spells (6) Brain Burst, Arcane Aegis, Bestial Communion, Crush of the Warp, Gaze of Beguilement, Hand of the Void, Lightning Bolt, Phase Door, Shadows \\u0026amp; Dust, Word de Ending","reaction":"2-4 Sadique · 5-10 Malicious · 11-12 Conspirateur","num":"#1"},{"fr":"Ombre","en":"Shade","hd":"4","ca":"12","dv":"4","attack":"Toucher 1d8 + 1d2 perte de For","nat19":"Jet de Chance ou l'arme/armure est transformée en ombre","mv":"Dépl. Rapide","attrs":{"D":16,"I":10,"P":13,"W":10,"Ch":7,"L":7},"special":"Mort-Vivant Incorporel. Immunisé contre les armes non magiques (excl. fer froid, eau bénite). Une victime réduite à zéro For est tuée instantanémenttanément, et rises as un Shade prochain minuit","reaction":"2-12 Hostile","num":"#2d6"},{"fr":"Hurleur","en":"Shrieker","hd":"1","ca":"10","dv":"1","attack":"Special","nat19":"Shrieks even louder!","mv":"Normale","attrs":{"S":10,"D":4,"C":8,"I":2,"P":13,"W":7,"Ch":4,"L":4},"special":"Immobile","reaction":"Shrieks!","num":"#2d6"},{"fr":"Squelette","en":"Skeleton","hd":"1","ca":"11","dv":"1","attack":"Lance 1d6+1","nat19":"Un autre Squelette s'anime pour aider","mv":"Normale","attrs":{"S":13,"D":10,"C":10,"P":13,"L":4},"special":"Mort-Vivant. Immunisé contre les dégâts perforants","reaction":"Creator’s orders ou Hostile","num":"#3d10"},{"fr":"Skorn","en":"Skorn","hd":"2","ca":"11","dv":"2","attack":"Gourdin 1d6+1","nat19":"Skull Strike: Étourdi (Jet de Chance (Con) résiste)","mv":"Normale","attrs":{"S":15,"D":10,"C":13,"I":7,"P":12,"W":8,"Ch":8,"L":5},"special":"Partial dark vision (Près de Aveugle à la place de Aveugle)","reaction":"2-3 Enragé · 4-5 Hostile · 6-8 Affamé · 9-10 Careful · 11-12 Intéressé","num":"#4d6"},{"fr":"Skratt","en":"Skratt","hd":"1","ca":"11","dv":"1","attack":"Morsure 1d6","nat19":"Tail whip 1d6 dégâts et renversé","mv":"Escalade Normale","attrs":{"S":10,"D":13,"C":8,"I":9,"P":13,"W":7,"Ch":8,"L":5},"special":". Après combat, anyone injured doit make un Jet de Chance (Con) ou subir un maladie","reaction":"2-3 Affamé! · 4-5 Hostile · 6-8 Menaçant · 9-10 Reserved · 11-12 Fearful","num":"#4d4"},{"fr":"Slop Gorger","en":"Slop Gorger","hd":"9","ca":"13","dv":"9+2","attack":"Morsure 3d4 et Tentacules (3) 1d8+1","nat19":"Saisi et Trauma Contondant (1d8+4), Jet de Chance (Dex) annule","mv":"Nage Rapide","attrs":{"S":19,"D":8,"C":17,"I":3,"P":10,"W":9,"Ch":3,"L":10},"special":". Après combat, anyone injured doit make un Jet de Chance (Con) ou subir un maladie","reaction":"2-5 Violent · 6-8 Vorace · 9-10 Exploratoire · 11-12 Unconcerned","num":"#1"},{"fr":"Spectre","en":"Spectre","hd":"7","ca":"15","dv":"7","attack":"Toucher 1d10 + Drain 1 niveau jusqu'à la prochaine période de repos","nat19":"Special","mv":"Vol Rapide","attrs":{"D":15,"I":13,"P":15,"W":15,"Ch":9,"L":9},"special":". Mort-Vivant Incorporel. Immunisé contre les armes non magiques (excl. fer froid, eau bénite). Sur un Nat 19 le cible et Spectre vanish pour un nightmare realm de dark sorcery pour finish son duel. Si le Spectre is defeated, le cible reappears. Un PC drained pour zero niveau dies et rises as un Wraith dans 1d4 nights","reaction":"2-8 Meurtrier · 9-10 Malveillant · 11-12 Épris","num":"#1"},{"fr":"Araignée Géante","en":"Giant Spider","hd":"2","ca":"13","dv":"2+2","attack":"Morsure 1d6+1 + Poison","nat19":"","mv":"Escalade Normale","attrs":{"S":14,"D":16,"C":12,"I":2,"P":12,"W":10,"Ch":4,"L":5},"special":". GM decides le Poison ou tirer 1d20 sur la Poison table p.226. Cutting un victime free de webs nécessitees un Pour check","reaction":"2-5 Hostile · 6-8 Affamé · 9-12 Prudent","num":"#2d4"},{"fr":"Nest Mother","en":"Nest Mother","hd":"12","ca":"12","dv":"12","attack":"Morsure 2d6 + Poison (Jet de Chance (Con) ou death dans 1d3 rounds)","nat19":"","mv":"Climb Proche","attrs":{"S":18,"D":16,"C":16,"I":5,"P":12,"W":15,"Ch":5,"L":10},"special":". Off Turn Attacks. Cutting un victime free de webs nécessitees un Pour check","reaction":"2-8 Hostile · 9-10 Traître · 11-12 Calculateur","num":"#1"},{"fr":"Lutin","en":"Sprite","hd":"1","ca":"12","dv":"1","attack":"Arc 1d2 + Poison: Jet de Chance (Vol) ou deep slumber pour 1d4 hours","nat19":"Fey Curse: Perd 1 point de Chance","mv":"Nage Normale","attrs":{"S":3,"D":17,"C":5,"I":12,"P":13,"W":15,"Ch":15,"L":3},"special":", Fly/. Empoisonné victims awaken avec pas de memory du prior hour, bereft de as many shiny trinkets (coins, gems, etc) as le Sprites peut carry","reaction":"2-3 Hostile · 4-7 Avide · 8-10 Malicieux · 11-12 Curieux","num":"#5d4"},{"fr":"Stirge","en":"Stirge","hd":"1","ca":"12","dv":"1d4","attack":"Morsure 1d3 + Special","nat19":"Jet de Chance (Con) ou maladie","mv":"Vol Normal","attrs":{"S":4,"D":16,"C":6,"I":2,"P":10,"W":5,"Ch":4,"L":3},"special":". Morsure victims subir 1d4 blood drain à la fin du son tour sauf si contest. de Pour (S13) pour pry off (action, kills le Stirge). Attacking un Stirge attached pour un allié subit un -2 penalty et sur un 1-3 jet d'attaque strikes le PC. Dousing avec smoke makes eux sleepy et aimless (Vol check résiste). Si left unchecked Stirges will kill un inconscient PC dans 1d6 rounds","reaction":"2-7 Vorace · 8-10 Follow à un distance · 11-12 S'envole","num":"#3d10"},{"fr":"Nuée de Fourmis Coupantes","en":"Bone Cutter Ant Swarm","hd":"4","ca":"13","dv":"4","attack":"Bites 1d10","nat19":"Overwhelmed! Chance (For/ Dex) ou Sans défense pour 1d3 rounds","mv":"Escalade Normale","attrs":{"S":7,"D":14,"C":9,"I":2,"P":11,"W":11,"Ch":4,"L":7},"special":". Swarm (p.170). Menaçant le ants avec feu peut keep eux à bay pour un short time (Vol check résiste). Long standing nests close pour trade routes gather piles de salvaged goods (equal pour 1 x 4 HD Lair Treasure)","reaction":"2-5 Hostile · 6-8 Affamé · 9-10 Exploratoire · 11-12 Indifférent","num":"#1d4+1"},{"fr":"Crapaud Géant","en":"Giant Toad","hd":"4","ca":"14","dv":"4","attack":"Morsure 1d12 et Tongue portée Proche, traîné into Corps à corps + Saisi (contest. de Pour résiste, pas de action)","nat19":"Swallowed: 2d6 sur Toad’s tour, victime peut seulement use action pour make small arme attacks (vs AC 10)","mv":"Leap Proche","attrs":{"S":18,"D":12,"C":17,"I":3,"P":10,"W":14,"Ch":5,"L":7},"special":",","reaction":"2-5 Combatif · 6-8 Affamé · 9-12 Languissant","num":"#1d8"},{"fr":"Sylvanien Racinerouge","en":"Bloodroot Treant","hd":"11","ca":"17","dv":"11","attack":"Batter (2) 3d6","nat19":"Trauma Contondant (1d8+4)","mv":"Normale","attrs":{"S":22,"D":10,"C":20,"I":3,"P":13,"W":17,"Ch":4,"L":11},"special":"Feu cause dégâts doublés","reaction":"2-6 Hostile · 7-10 Affamé · 11-12 Repu","num":"#1d4"},{"fr":"Troll","en":"Troll","hd":"7","ca":"13","dv":"7","attack":"Griffes (2) 1d4+2 et Morsure 1d8+1","nat19":"Un à proximité pet ou hireling is eaten ou has un limb torn off","mv":"Normale","attrs":{"S":19,"D":12,"C":17,"I":6,"P":7,"W":8,"Ch":7,"L":9},"special":"Régén. (tous dégâts, feu, acide). Si réduit àour zero points de vie et completely burnt ou buried le Troll does pas régénèreate","reaction":"2-5 Destructeur · 6-8 Vorace · 9-10 Grossier · 11-12 Indifférent","num":"#1d12"},{"fr":"Urgot","en":"Urgot","hd":"1","ca":"11","dv":"1+4","attack":"Gourdin/Morsure/etc 1d6+1","nat19":"Veil Curse: Perd 1d3 Chance","mv":"Normale","attrs":{"S":13,"D":13,"C":16,"I":7,"P":9,"W":12,"Ch":6,"L":5},"special":"Un groupe d' Urgot peut lancer un Disturbing Moan (1) portée Proche, zone Proche, Jet de Chance (Vol) ou Folie aléatoire","reaction":"2-5 Meurtrier · 6-8 Affamé pour flesh · 9-10 Prudent but attiré pour n'importe quel magic le party might possess · 11-12 Curieux","num":"#2d6"},{"fr":"Vampire","en":"Vampire","hd":"9","ca":"13","dv":"9","attack":"Morsure 1d12 + Drain 1 niveau jusqu'à la prochaine période de repos","nat19":"Un Thrall vient en aide au Vampire","mv":"Escalade Normale","attrs":{"S":19,"D":19,"C":16,"I":13,"P":17,"W":16,"Ch":16,"L":10},"special":"Mort-Vivant. Off Turn Attacks. Immunisé contre les armes non magiques (excl. fer froid, eau bénite). Charming Voice (3) As Gaze of Beguilement (Int 18) Régén. (1d12, feu, holy). Si réduit àour zero un Vampire turns pour mist et flies pour son coffin, où cela régénèreates dans 1d4 hours","reaction":"2-3 Enragé · 4-5 Affamé · 6-8 Malveillant · 9-10 Curieux · 11-12 Concupiscent","num":"#1"},{"fr":"Thrall","en":"Thrall","hd":"3","ca":"13","dv":"3","attack":"Morsure 1d10 + Drain 1 niveau jusqu'à la prochaine période de repos","nat19":"Blood Frenzy: Bonus Morsure attack","mv":"Normale","attrs":{"S":18,"D":14,"C":14,"I":10,"P":11,"W":14,"Ch":10,"L":5},"special":"Immunisé contre les armes non magiques (excl. fer froid, eau bénite). Régén. (1d12, feu, acide)","reaction":"2-3 Hostile · 4-5 Affamé · 6-8 Traître · 9-10 Scrutateur · 11-12 Aroused","num":"#3d6"},{"fr":"Marionnette de Vigne","en":"Vine Puppet","hd":"7","ca":"14","dv":"7","attack":"Crush 2d8 + Saisi","nat19":"Choke: victime commence qui suffoque, Contest. de Pour (action) pour se libérer","mv":"Normale","attrs":{"S":17,"D":14,"C":8,"I":2,"P":11,"W":11,"Ch":1,"L":8},"special":"Off Turn Attacks. Major Exploit Protection. Un Vine Puppet’s animus protects eux de feu (demi-dégâts)","reaction":"2-12 Hostile","num":"#1"},{"fr":"Guêpe Géante","en":"Giant Wasp","hd":"5","ca":"14","dv":"5","attack":"Piqûre 2d6 + Poison: Jet de Chance (Con) ou paralysed (Sans défense) pour 1d4 hours","nat19":"Strong dose: Désav. sur Poison jet de sauvegarde et si failed, random limb paralysed pour 1d4 days","mv":"Vol Rapide","attrs":{"S":14,"D":14,"C":9,"I":2,"P":13,"W":13,"Ch":6,"L":8},"special":",","reaction":"2-7 Agressif · 8-9 Exploratoire · 10-12 Distracted","num":"#2d4"},{"fr":"Revenant","en":"Wight","hd":"5","ca":"14","dv":"5","attack":"Griffe 1d10 + Drain 1 niveau jusqu'à la prochaine période de repos","nat19":"Impart Sorcery: targets rolls pour un DDM effect","mv":"Normale","attrs":{"S":17,"D":14,"C":14,"I":15,"P":16,"W":15,"Ch":8,"L":8},"special":"Mort-Vivant. Immunisé contre les armes non magiques (excl. fer froid, eau bénite). Creatures killed par un Wight’s touch rise as Zombies à minuit. Spells (4) Glimpse le True Gods, Lightning Bolt, Conjure Entity, Gabbling of the Jade Moon, Hand of the Void","reaction":"2-6 Hostile · 7-9 Sinistre · 10-12 Curieux","num":"#1"},{"fr":"Serpent Ailé","en":"Winged Snake","hd":"3","ca":"14","dv":"3","attack":"Morsure 1d8 + Poison","nat19":"Disarmed et le snake flies away avec le arme","mv":"Vol Normal","attrs":{"S":10,"D":17,"C":10,"I":3,"P":13,"W":9,"Ch":4,"L":6},"special":". GM decides le Poison ou tirer 1d20 sur la Poison table p.226. Crachat Venom (recharge 40%) portée Proche, Jet de Chance (Con) ou Poison effect","reaction":"2-4 Agressif · 5-6 Affamé · 7-9 Prudent · 10-12 Fly sur par","num":"#3d4"},{"fr":"Ver de Givre","en":"Frost Worm","hd":"7","ca":"15","dv":"7","attack":"Morsure 2d8","nat19":"Trauma Tranchant (1d10+2)","mv":"Fouissement Normal","attrs":{"S":19,"D":10,"C":15,"I":3,"P":8,"W":14,"Ch":4,"L":9},"special":". Frost Breath (1) portée Proche, cible subit 6d6 dégâts et Saisi (Jet de Chance (Con) pour moitié)","reaction":"2-6 Hostile · 7-9 Affamé · 10-12 Prudent","num":"#2d4"},{"fr":"Ver de Peste","en":"Plague Worm","hd":"3","ca":"17","dv":"3","attack":"Batter 1d10+1","nat19":"Trauma Contondant (1d10+2), Jet de Chance (Dex) annule","mv":"Fouissement Normal","attrs":{"S":17,"D":10,"C":13,"I":3,"P":10,"W":10,"Ch":5,"L":6},"special":". Après combat, anyone injured doit make un Jet de Chance (Con) ou subir Greyscale Blight","reaction":"2-8 Vorace · 9-12 Repu","num":"#1d6"},{"fr":"Spectre Malin","en":"Wraith","hd":"6","ca":"14","dv":"6","attack":"Ghostly Épée 1d12 + 1d4 Vol perte","nat19":"Veil Conduit: targets rolls pour un DDM effect","mv":"Normale","attrs":{"D":17,"I":10,"P":13,"W":12,"Ch":7,"L":8},"special":"Mort-Vivant. Peut switch between Incorporeal et physical form (action). Creatures drained pour zero Vol die instantly avec un pitiable shriek","reaction":"2-8 Violent · 9-10 Haineux · 11-12 Envious","num":"#1d6"},{"fr":"Wyvern","en":"Wyvern","hd":"13","ca":"17","dv":"13","attack":"Morsure 2d8 et Piqûre 1d6+2 + Poison: Jet de Chance (Con) ou réduit àour zero (si jet de sauvegarde, 20 dégâts)","nat19":"","mv":"Vol Rapide","attrs":{"S":22,"D":16,"C":20,"I":3,"P":15,"W":14,"Ch":7,"L":13},"special":",","reaction":"2-6 Hostile · 7-9 Affamé · 10-12 Prudent","num":"#1d4"},{"fr":"Xarrox","en":"Xarrox","hd":"6","ca":"15","dv":"6","attack":"Morsure 2d8","nat19":"Trauma Tranchant (1d8+4)","mv":"Burrow Fast","attrs":{"S":19,"D":13,"C":16,"I":3,"P":10,"W":11,"Ch":4,"L":8},"special":", Nage Proche. Tremorsense, Echolocation. Xarrox claws are perfectly evolved pour burrow through earth et soft stone","reaction":"2-5 Destructeur · 6-9 Affamé · 10-12 Unconcerned","num":"#2d4"},{"fr":"Xornling","en":"Xornling","hd":"1","ca":"15","dv":"1d4","attack":"Morsure metal arme ou armure subit -1 dégâts ou AC jusqu'à réparation","nat19":"Stonebite: random limb de cible is turned pour stone (Jet de Chance (Con) annule) pour 2d6 days (Cleansing Charm retires)","mv":"Escalade Normale","attrs":{"S":6,"D":17,"C":9,"I":4,"P":13,"W":12,"Ch":9,"L":3},"special":"“Hear” gems, coins, etc. Tremorsense, Echolocation. Un Xornling left pour son own devices will eat 1d10 coins, gemstones, ou un chunk de un metal every few hours. Chameleonic, advantage quand hiding","reaction":"2-5 Affamé! · 6-9 Investigateur · 10-12 Joueur","num":"#2d4"},{"fr":"Yegnu","en":"Yegnu","hd":"7","ca":"12","dv":"7","attack":"Vrille acide (2) 1d8 + Jet de Chance (Con) ou paralysed (Sans défense) pour 1d4 mins","nat19":"Hypnotic Eye: cible Étourdi","mv":"Escalade Normale","attrs":{"S":10,"D":8,"C":18,"I":10,"P":10,"W":19,"Ch":3,"L":9},"special":"Tremorsense. Yegnu peut mould son shape pour suit son purpose. Once paralysed, le parasite subit up residence dans le victime’s stomach. Un cupped handful de salt cause le Yegnu 1d10 dégâts. Forcing un victime pour eat large quantities de salt forces le parasite pour be regurgitated","reaction":"2-12 Hostile","num":"#1d6"},{"fr":"Moisissure Jaune","en":"Yellow Mould","hd":"3","ca":"10 (auto hit in melee)","dv":"3","attack":"Projectile Spore portée Proche, zone Proche: Jet de Chance (Con) ou die un horrible choking death dans 1d6 rounds","nat19":"Misfire: un sad, tiny puff wheezes out (annule attack)","mv":"Normale","attrs":{"S":6,"C":16,"I":2,"P":14,"L":6},"special":"Immobile. Sense warm bodied creatures within portée Loin. Protecting le nose et mouth avec un mask accorde advantage sur la spore jet de sauvegarde. Apothecary treatments delay spore death par 1d6 days, -2 penalty pour actions dans le meantime (ou cure sur un Great Success). Double dégâts de feu","reaction":"2-12 Hostile. Zombies are walking corpses, mindlessly obeying son creator’s orders. Ils come dans several variants, certains de qui appear below","num":"#1d4"},{"fr":"Zombie Mangeur de Cerveaux","en":"Brain Eater Zombie","hd":"3","ca":"11","dv":"3+3","attack":"Morsure 1d6+2","nat19":"Choking Grasp: cible’s brains are eaten sur la Zombie’s prochain tour sauf si le deux are somehow séparés","mv":"Dépl. Lent","attrs":{"S":15,"D":10,"C":14,"P":12,"L":5},"special":"Mort-Vivant. Sprint (1) Déplacement Loin. Brain Eaters kill inconscient victims avec son prochain action si le body is pas recovered","reaction":"As creator’s orders ou · 2-12 Hostile","num":"#2d4+4"},{"fr":"Zombie Géant","en":"Giant Zombie","hd":"10","ca":"14 (armour)","dv":"10","attack":"Hache 3d6+2","nat19":"1d3 à proximité corpses animate pour aid le Giant Zombie","mv":"Normale","attrs":{"S":21,"D":6,"C":22,"P":10,"L":12},"special":"Mort-Vivant. Giant Zombies kill inconscient victims avec son prochain action si body pas recovered","reaction":"2-12 Hostile","num":"#1d2"},{"fr":"Zombie Marcheur","en":"Walker Zombie","hd":"2","ca":"11","dv":"2+2","attack":"Poing 1d8","nat19":"1d3 à proximité corpses animate pour aid cette Zombie","mv":"Dépl. Lent","attrs":{"S":15,"D":7,"C":18,"P":12,"L":5},"special":"Mort-Vivant. Walkers dismember inconscient victims avec son prochain action si le body is pas recovered (dead)","reaction":"As creator’s orders ou · 2-12 Hostile","num":"#3d8"},{"fr":"Nuée de Zombies","en":"Zombie Swarm","hd":"6","ca":"8","dv":"6","attack":"Poing 1d12","nat19":"","mv":"Dépl. Lent","attrs":{"S":19,"D":5,"C":18,"P":10,"L":6},"special":"Mort-Vivant. Swarm (p.170). Zombie Swarms are easily baited et déplacement towards wherever ils think le closest prey is. Ils kill inconscient victims avec son prochain action si le body is pas recovered","reaction":"As creator’s orders ou · 2-12 Hostile. ZoMBIES","num":"#1"},{"fr":"N'Tarc","en":"N'Tarc","hd":"5","ca":"13","dv":"5","attack":"Morsure 2d6 + vieillissement 1d10 ans (sans jet)","nat19":"La cible perd son tour, coincée dans une boucle de déjà-vu","mv":"Vol Normal","attrs":{"S":13,"D":13,"C":9,"I":16,"P":15,"W":14,"Ch":5,"L":8},"special":"Temporal Warp (recharge 30%) portée Proche : cible vieillit 3d10 ans (Jet de Chance (Con) pour moitié). Spells (3) : Strange Joining, Crush of the Warp, Gaze of Beguilement","reaction":"2-5 En train de moissonner · 6-8 Calculateur · 9-10 Curieux · 11-12 Diplomatique","num":"#2d4"},{"fr":"Progéniture Tentaculaire","en":"Tentacle Spawn","hd":"10","ca":"13","dv":"10+2","attack":"Tentacules (2) 1d8 + Spécial","nat19":"Mind Lash : cible Étourdie","mv":"Normale","attrs":{"S":13,"D":16,"C":14,"I":19,"P":19,"W":19,"Ch":15,"L":10},"special":"Si les deux Tentacules touchent : Jet de Chance (Con) ou la cible meurt au prochain tour (sauf séparation). Psychic Blast (recharge 30%) zone Corps à corps : Étourdi, perte 1d6 Int et Folie (Jet de Chance (Vol) annule Étourdissement/Folie, réduit perte Int de moitié). Psionics (6) : Strange Joining, Crush of the Warp, Gaze of Beguilement, Brain Burst, Hand of the Void, Psychic Force","reaction":"2-6 Affamé de cerveaux · 7-9 Trompeur · 10-12 Fasciné","num":"#1 ou 1d4 (cosse)"},{"fr":"Feu Follet","en":"Will O' Wisp","hd":"2","ca":"16","dv":"2+2","attack":"Choc électrique 1d10","nat19":"Torches, lanternes etc. s'éteignent à portée Proche ; tous les Feux Follets de la zone deviennent invisibles jusqu'à la fin de leur prochain tour","mv":"Vol Rapide","attrs":{"S":3,"D":19,"C":6,"I":11,"P":15,"W":15,"Ch":5,"L":5},"special":"Mort-Vivant. Gagnent toujours l'Initiative. Les anciens Feux Follets peuvent manifester des illusions (Shadows \\u0026amp; Dust (GR), portée Très Loin)","reaction":"2-7 Sadique · 8-12 Malicieux","num":"#2d4"}];
+
+// ── STATE ──
+let players = JSON.parse(localStorage.getItem('toa_players') || '[]');
+let activeEnemies = [];
+let hdFilter = 'all';
+let bHdFilter = 'all';
+let recentHistory = JSON.parse(localStorage.getItem('toa_history') || '[]');
+let bSubTab = 'bestiary';
+
+// ── DICE ROLLER ──
+function rollDie(sides) { return Math.floor(Math.random() * sides) + 1; }
+function rollDice(n, sides) { let t=0; for(let i=0;i<n;i++) t+=rollDie(sides); return t; }
+function parseNumDice(str) {
+  const clean = str.replace('#','').trim();
+  const m = clean.match(/^(\d+)d(\d+)$/i);
+  if(m) return rollDice(parseInt(m[1]), parseInt(m[2]));
+  const n = parseInt(clean);
+  return isNaN(n) ? 1 : n;
+}
+function rollReaction(m) {
+  const roll = rollDie(6) + rollDie(6);
+  const reactionStr = m.reaction || '';
+  const entries = reactionStr.split('·').map(s => s.trim());
+  for(const entry of entries) {
+    const rm = entry.match(/^(\d+)(?:-(\d+))?\s+(.+)$/);
+    if(rm) {
+      const lo = parseInt(rm[1]);
+      const hi = rm[2] ? parseInt(rm[2]) : lo;
+      if(roll >= lo && roll <= hi) return { roll, text: rm[3].trim() };
+    }
+  }
+  return { roll, text: entries[0] || '—' };
+}
+
+// ── POP-UP D\'AJOUT DE CRÉATURE ──
+let pendingMonsterIdx = null;
+function openAddPopup(idx) {
+  pendingMonsterIdx = idx;
+  const m = MONSTERS[idx];
+  const displayName = m.en || m.fr;
+  document.getElementById('popup-title').textContent = displayName;
+  document.getElementById('popup-fr').textContent = (m.en && m.en!==m.fr) ? '(' + m.fr + ')' : '';
+  document.getElementById('popup-num').textContent = 'Habituel: ' + (m.num||'#1');
+  const suggested = m.num ? parseNumDice(m.num) : 1;
+  document.getElementById('popup-count').value = suggested;
+  document.getElementById('popup-roll-result').textContent = '';
+  document.getElementById('add-popup-overlay').style.display = 'flex';
+  setTimeout(() => { document.getElementById('popup-count').focus(); document.getElementById('popup-count').select(); }, 50);
+}
+function closeAddPopup() {
+  document.getElementById('add-popup-overlay').style.display = 'none';
+  pendingMonsterIdx = null;
+}
+function rollPopupCount() {
+  if(pendingMonsterIdx === null) return;
+  const m = MONSTERS[pendingMonsterIdx];
+  const rolled = m.num ? parseNumDice(m.num) : 1;
+  document.getElementById('popup-count').value = rolled;
+  document.getElementById('popup-roll-result').textContent = '🎲 ' + (m.num||'#1') + ' → ' + rolled;
+}
+function rollDV(dvStr) {
+  // e.g. "2" -> 2d8, "3+4" -> 3d8+4, "4+3" -> 4d8+3, "1d6" -> 1d6 (special)
+  const s = dvStr.trim();
+  // Special: already has 'd' -> use literal dice (e.g. "1d6", "1d4")
+  const special = s.match(/^(\d+)d(\d+)$/i);
+  if(special) return rollDice(parseInt(special[1]), parseInt(special[2]));
+  // Standard: "N" or "N+B"
+  const m = s.match(/^(\d+)(?:\+(\d+))?$/);
+  if(m) {
+    const n = parseInt(m[1]);
+    const bonus = m[2] ? parseInt(m[2]) : 0;
+    return rollDice(n, 8) + bonus;
+  }
+  // Fallback
+  const n = parseInt(s);
+  return isNaN(n) ? 1 : rollDice(n, 8);
+}
+
+function confirmAddEnemy() {
+  if(pendingMonsterIdx === null) return;
+  const count = Math.max(1, parseInt(document.getElementById('popup-count').value) || 1);
+  const m = MONSTERS[pendingMonsterIdx];
+  const reactions = [];
+  const hpRolls = [];
+  for(let i=0;i<count;i++) {
+    reactions.push(rollReaction(m));
+    hpRolls.push(rollDV(m.dv));
+  }
+  const id = 'ae' + Date.now();
+  activeEnemies.push({m, count, id, reactions, hpRolls});
+  const histEntry = { fr: m.fr, en: m.en||m.fr, ca: m.ca, dv: m.dv, hd: m.hd, count, timestamp: Date.now() };
+  recentHistory.unshift(histEntry);
+  if(recentHistory.length > 30) recentHistory = recentHistory.slice(0,30);
+  localStorage.setItem('toa_history', JSON.stringify(recentHistory));
+  closeAddPopup();
+  renderActiveEnemies();
+  renderHistory();
+}
+document.addEventListener('keydown', e => { if(e.key==='Escape') closeAddPopup(); });
+
+// ── TAB SWITCHING ──
+function showTab(n) {
+  document.querySelectorAll('.tab').forEach((t,i) => t.classList.toggle('active', i===n));
+  // panels: scene(0), bestiary(1), characters(2), settings(3)
+  const panelIds = ['panel-scene','panel-bestiary','panel-characters','panel-settings'];
+  panelIds.forEach((id,i) => {
+    const el = document.getElementById(id);
+    if(el) el.classList.toggle('active', i===n);
+  });
+}
+
+// ── PC PANEL (kept for compatibility) ──
+function renderPCs() { renderCombatPlayers(); }
+
+// ── ENEMY PANEL ──
+function buildHDFilters() {
+  const hdVals = ['all','lt1','1','2','3','4','5','6','7','8+'];
+  const el = document.getElementById('hd-filters');
+  el.innerHTML = hdVals.map(v => {
+    const lbl = v==='all'?'Tous':v==='lt1'?'DV<1':v==='8+'?'DV8+':'DV'+v;
+    return `<button class="hd-btn ${v==='all'?'active':''}" onclick="setHDFilter('${v}',this)">${lbl}</button>`;
+  }).join('');
+}
+function setHDFilter(v, btn) {
+  hdFilter = v;
+  document.querySelectorAll('#hd-filters .hd-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  filterEnemyList();
+}
+function hdMatch(hdRaw, filter) {
+  if(filter==='all') return true;
+  const n = parseFloat(hdRaw);
+  if(filter==='lt1') return n < 1;
+  if(filter==='8+') return n >= 8;
+  return Math.floor(n) === parseInt(filter);
+}
+function filterEnemyList() {
+  const q = document.getElementById('enemy-search').value.toLowerCase();
+  const el = document.getElementById('enemy-list');
+  const visible = MONSTERS.filter(m => {
+    const nameMatch = !q || m.fr.toLowerCase().includes(q) || m.en.toLowerCase().includes(q);
+    return nameMatch && hdMatch(m.hd, hdFilter);
+  });
+  if(!visible.length) { el.innerHTML = '<div style="text-align:center;padding:1rem;font-style:italic;color:rgba(200,169,110,.35);font-size:.78rem;">Aucune créature trouvée</div>'; return; }
+  el.innerHTML = visible.map(m => {
+    const ri = MONSTERS.indexOf(m);
+    const displayName = m.en || m.fr;
+    return `<div class="enemy-row">
+      <div>
+        <span class="enemy-row-name">${displayName}</span>${(m.en && m.en!==m.fr)?`<span class="enemy-row-en">(${m.fr})</span>`:''}
+        <div class="enemy-row-stats">CA&nbsp;${m.ca} · DV&nbsp;${m.dv} · <span style="font-size:.64rem;color:rgba(200,169,110,.6);">${m.mv}</span></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:.4rem;">
+        <span class="enemy-hd-badge">DV ${m.hd}</span>
+        <button class="add-btn" onclick="openAddPopup(${ri})">+ Ajouter</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function removeEnemy(id) {
+  activeEnemies = activeEnemies.filter(e=>e.id!==id);
+  renderActiveEnemies();
+}
+function changeCount(id, delta) {
+  const e = activeEnemies.find(e=>e.id===id);
+  if(!e) return;
+  e.count = Math.max(1, e.count+delta);
+  if(delta > 0) { for(let i=0;i<delta;i++) e.reactions.push(rollReaction(e.m)); }
+  else if(delta < 0) { e.reactions = e.reactions.slice(0, e.count); }
+  renderActiveEnemies();
+}
+function rerollReactions(id) {
+  const e = activeEnemies.find(e=>e.id===id);
+  if(!e) return;
+  e.reactions = [];
+  for(let i=0;i<e.count;i++) e.reactions.push(rollReaction(e.m));
+  renderActiveEnemies();
+}
+// ── PARSE & ROLL DAMAGE DICE ──
+// Extracts all NdM+K patterns from a string and rolls them
+function parseDamageExpr(str) {
+  // Find all dice expressions: e.g. "1d6+2", "2d8", "1d4-1", "2d6"
+  const parts = [];
+  const re = /(\d+)d(\d+)([+-]\d+)?/gi;
+  let m;
+  while((m = re.exec(str)) !== null) {
+    const n = parseInt(m[1]), sides = parseInt(m[2]), bonus = m[3] ? parseInt(m[3]) : 0;
+    const rolled = rollDice(n, sides);
+    const total = rolled + bonus;
+    const label = `${n}d${sides}${bonus>0?'+'+bonus:bonus<0?bonus:''}`;
+    parts.push({ label, rolled, bonus, total });
+  }
+  return parts;
+}
+
+function rollAttackAction(enemyId, monsterIdx, bonusAtk) {
+  const attackStr = MONSTERS[monsterIdx] ? MONSTERS[monsterIdx].attack || '—' : '—';
+  const d20 = rollDie(20);
+  const hitTotal = d20 + bonusAtk;
+  const nat = d20 === 20 ? ' ★ NAT 20!' : d20 === 1 ? ' ✗ NAT 1' : '';
+  const dmgParts = parseDamageExpr(attackStr);
+  const dmgLines = dmgParts.map(p => {
+    const sign = p.bonus > 0 ? `+${p.bonus}` : p.bonus < 0 ? String(p.bonus) : '';
+    return `<span class="atk-dmg-chip">${p.label} = <b>${p.total}</b></span>`;
+  });
+
+  let toast = document.getElementById('roll-toast');
+  if(!toast) {
+    toast = document.createElement('div');
+    toast.id = 'roll-toast';
+    toast.style.cssText = 'position:fixed;bottom:1.5rem;right:1.5rem;z-index:2000;background:linear-gradient(135deg,#2a1508,#1a0e05);border:2px solid var(--gold);border-radius:6px;padding:.9rem 1.2rem;font-family:Cinzel,serif;box-shadow:0 6px 30px rgba(0,0,0,.7);min-width:260px;transition:opacity .3s;';
+    document.body.appendChild(toast);
+  }
+  toast.style.borderColor = 'var(--gold)';
+  toast.innerHTML = `
+    <div style="font-size:.58rem;color:rgba(200,169,110,.6);letter-spacing:.1em;margin-bottom:.4rem;">ATTAQUE${nat}</div>
+    <div style="display:flex;align-items:baseline;gap:.6rem;margin-bottom:.45rem;">
+      <span style="font-size:1.9rem;font-weight:900;color:var(--gold3);">${hitTotal}</span>
+      <span style="font-size:.7rem;color:rgba(200,169,110,.65);">🎲${d20} + ${bonusAtk} bonus</span>
+    </div>
+    ${dmgLines.length ? `<div style="font-size:.72rem;color:rgba(200,169,110,.8);margin-bottom:.2rem;">Dégâts :</div>
+    <div style="display:flex;flex-wrap:wrap;gap:.3rem;">${dmgLines.join('')}</div>` : ''}
+    <div style="font-size:.6rem;color:rgba(200,169,110,.35);margin-top:.4rem;">${attackStr}</div>`;
+  toast.style.opacity = '1';
+  clearTimeout(rollTimeout);
+  rollTimeout = setTimeout(() => { toast.style.opacity = '0'; }, 5000);
+}
+
+// ── INLINE HP EDITOR FOR ENEMIES ──
+function startEditHP(enemyId, creatureIdx) {
+  const e = activeEnemies.find(e => e.id === enemyId);
+  if(!e) return;
+  const hp = e.hpRolls && e.hpRolls[creatureIdx] !== undefined ? e.hpRolls[creatureIdx] : '?';
+  const cell = document.getElementById('hp-cell-' + enemyId + '-' + creatureIdx);
+  if(!cell) return;
+  cell.innerHTML = `<input type="number" value="${hp}" min="0"
+    style="width:46px;background:rgba(244,234,213,.15);border:1px solid var(--gold);border-radius:2px;color:var(--parch);font-family:Cinzel,serif;font-size:.65rem;font-weight:700;text-align:center;padding:.05rem .2rem;outline:none;"
+    onblur="commitHP('${enemyId}',${creatureIdx},this.value)"
+    onkeydown="if(event.key==='Enter')this.blur();if(event.key==='Escape'){renderActiveEnemies();}"
+    onclick="event.stopPropagation()">`;
+  cell.querySelector('input').focus();
+  cell.querySelector('input').select();
+}
+
+function commitHP(enemyId, creatureIdx, val) {
+  const e = activeEnemies.find(e => e.id === enemyId);
+  if(!e) return;
+  const newVal = parseInt(val);
+  if(!isNaN(newVal)) {
+    if(!e.hpRolls) e.hpRolls = [];
+    e.hpRolls[creatureIdx] = newVal;
+  }
+  renderActiveEnemies();
+}
+
+function renderActiveEnemies() {
+  const el = document.getElementById('active-enemies');
+  if(!activeEnemies.length) {
+    el.innerHTML = '<div class="no-pc" style="font-size:.75rem;">Ajoutez des créatures depuis l\'onglet Bestiaire</div>';
+    return;
+  }
+  el.innerHTML = activeEnemies.map(e => {
+    const m = e.m;
+    const bonusAtk = Math.min(12, parseInt(m.hd)||1);
+    const displayName = m.en || m.fr;
+    // Group reactions by behaviour text, keep track of indices and rolls
+    let reactionsHtml = '';
+    if(e.reactions && e.reactions.length) {
+      const groups = {};
+      e.reactions.forEach((r, i) => {
+        const key = r.text;
+        if(!groups[key]) groups[key] = { text: r.text, indices: [], rolls: [] };
+        groups[key].indices.push(i+1);
+        groups[key].rolls.push(r.roll);
+      });
+      reactionsHtml = Object.values(groups).map(g => {
+        const idxStr = g.indices.length > 1
+          ? `#${g.indices[0]}–#${g.indices[g.indices.length-1]}`
+          : `#${g.indices[0]}`;
+        const rollStr = g.rolls.map(r => `🎲${r}`).join(' ');
+        const countBadge = g.indices.length > 1 ? `<span class="ae-react-count">×${g.indices.length}</span>` : '';
+        return `<div class="ae-reaction"><span class="ae-react-idx">${idxStr}</span>${countBadge}<span class="ae-react-roll">${rollStr}</span><span class="ae-react-text">${g.text}</span></div>`;
+      }).join('');
+    }
+    return `<div class="ae-card">
+      <div class="ae-header">
+        <span class="ae-name">${displayName}${(m.en&&m.en!==m.fr)?` <span style="font-size:.62rem;opacity:.65;font-style:italic;">(${m.fr})</span>`:''}</span>
+        <button class="ae-remove" onclick="removeEnemy('${e.id}')" title="Retirer">✕</button>
+      </div>
+      <div class="ae-stats">
+        <span class="ae-stat">CA <span>${m.ca}</span></span>
+        <span class="ae-stat">DV <span>${m.dv}</span></span>
+        <span class="ae-stat">Bonus <span>+${bonusAtk}</span></span>
+        ${m.mv?`<span class="ae-stat">Dépl. <span>${m.mv}</span></span>`:''}
+        ${m.attrs&&m.attrs.L?`<span class="ae-stat">Chance <span>${m.attrs.L}</span></span>`:''}
+      </div>
+      ${e.hpRolls&&e.hpRolls.length?`<div class="ae-hp-rolls">${e.hpRolls.map((hp,i)=>{const dead=hp<=0;return `<span class="ae-hp-tag${dead?' dead':' ae-hp-editable'}" id="hp-cell-${e.id}-${i}" ${dead?'':` onclick="startEditHP('${e.id}',${i})" title="Cliquer pour modifier"`}>#${i+1} ${dead?'☠':'♥'} ${hp} PV${dead?'':' ✏'}</span>`;}).join('')}</div>`:''}
+      ${m.attack?`<button class="ae-attack-btn" onclick="rollAttackAction('${e.id}',${MONSTERS.indexOf(m)},${bonusAtk})">⚔ ${m.attack}</button>`:`<div class="ae-attack">—</div>`}
+      ${m.nat19?`<div class="ae-nat19">⚡ Nat 19 · ${m.nat19}</div>`:''}
+      ${m.special?`<div class="ae-attack" style="color:rgba(200,169,110,.7);font-style:italic;">${m.special}</div>`:''}
+      ${reactionsHtml?`<div class="ae-reactions-block">${reactionsHtml}</div>`:''}
+      <div class="ae-qty-row">
+        <button class="qty-btn" onclick="changeCount('${e.id}',-1)">−</button>
+        <span class="qty-label">×${e.count}</span>
+        <button class="qty-btn" onclick="changeCount('${e.id}',+1)">+</button>
+        <button class="qty-btn reroll-btn" onclick="rerollReactions('${e.id}')" title="Re-tirer les réactions" style="width:auto;padding:0 .4rem;font-size:.58rem;">🎲 Réac.</button>
+      </div>
+    </div>`;
+  }).join('');
+  updateEndCombatBtn();
+}
+
+// ── BESTIAIRE ──
+function buildBFilters() {
+  const hdVals = ['all','lt1','1','2','3','4','5','6','7','8+','11+'];
+  const el = document.getElementById('b-filters');
+  el.innerHTML = hdVals.map(v => {
+    const lbl = v==='all'?'Tous':v==='lt1'?'DV<1':v==='8+'?'DV 8-10':v==='11+'?'DV 11+':'DV '+v;
+    return `<button class="bft-btn ${v==='all'?'active':''}" onclick="setBFilter('${v}',this)">${lbl}</button>`;
+  }).join('');
+}
+function setBFilter(v, btn) {
+  bHdFilter = v;
+  document.querySelectorAll('#b-filters .bft-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  filterBestiary();
+}
+function bHdMatch(hdRaw, filter) {
+  if(filter==='all') return true;
+  const n = parseFloat(hdRaw);
+  if(filter==='lt1') return n < 1;
+  if(filter==='8+') return n >= 8 && n < 11;
+  if(filter==='11+') return n >= 11;
+  return Math.floor(n) === parseInt(filter);
+}
+function filterBestiary() {
+  const q = document.getElementById('b-search').value.toLowerCase();
+  let count = 0;
+  document.querySelectorAll('.bcard').forEach((card, i) => {
+    const m = MONSTERS[i];
+    if(!m) return;
+    const show = (!q || m.fr.toLowerCase().includes(q) || m.en.toLowerCase().includes(q)) && bHdMatch(m.hd, bHdFilter);
+    card.classList.toggle('bhidden', !show);
+    if(show) count++;
+  });
+  document.getElementById('b-cnt').textContent = count+' créature'+(count!==1?'s':'');
+}
+function renderBestiary() {
+  const el = document.getElementById('b-grid');
+  el.innerHTML = MONSTERS.map((m,i) => {
+    const displayName = m.en || m.fr;
+    const secName = (m.en && m.en!==m.fr) ? m.fr : '';
+    const attrHtml = ['S','D','C','I','P','W','Ch','L'].map(k=>{
+      const v = m.attrs&&m.attrs[k]!==undefined?m.attrs[k]:'-';
+      return `<div class="bcard-ab"><span class="bcard-an">${k}</span><span class="bcard-av">${v}</span></div>`;
+    }).join('');
+    return `<div class="bcard" data-idx="${i}">
+      <div class="bcard-head">
+        <span class="bcard-name">${displayName}${secName?` <span class="bcard-en">(${secName})</span>`:''}</span>
+        <span class="bcard-num">${m.num||''}</span>
+        <button class="bcard-add-btn" onclick="event.stopPropagation();openAddPopup(${i})">+ Combat</button>
+      </div>
+      <div class="bcard-body">
+        <div class="bcard-ks">
+          <div class="bcard-sp">CA <span class="v">${m.ca}</span></div>
+          <div class="bcard-sp">DV <span class="v">${m.dv}</span></div>
+        </div>
+        ${m.attack?`<div class="bcard-ar"><span class="bcard-al">Attaque</span>${m.attack}</div>`:''}
+        ${m.nat19?`<div class="bcard-ar bcard-n19"><span class="bcard-al">Nat 19</span>${m.nat19}</div>`:''}
+        <div class="bcard-attrs">${attrHtml}</div>
+        ${m.mv?`<span class="bcard-mv">${m.mv}</span>`:''}
+        ${m.special?`<div class="bcard-ab2">${m.special}</div>`:''}
+        ${m.reaction?`<div class="bcard-rc"><span class="bcard-rl">Réac</span>${m.reaction}</div>`:''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── SOUS-ONGLETS BESTIAIRE ──
+function showBSubTab(name) {
+  bSubTab = name;
+  document.querySelectorAll('.bst-btn').forEach(b => b.classList.toggle('active', b.dataset.tab===name));
+  document.getElementById('b-bestiary-view').style.display = name==='bestiary'?'':' none';
+  document.getElementById('b-history-view').style.display = name==='history'?'flex':'none';
+  if(name==='history') renderHistory();
+}
+function renderHistory() {
+  const el = document.getElementById('history-list');
+  if(!recentHistory.length) {
+    el.innerHTML = '<div class="no-pc" style="font-size:.78rem;padding:2rem;">Aucune créature ajoutée pour l\'instant</div>';
+    return;
+  }
+  el.innerHTML = recentHistory.map((h, i) => {
+    const ago = timeAgo(h.timestamp);
+    return `<div class="hist-card">
+      <div class="hist-head">
+        <span class="hist-name">${h.en||h.fr}</span>
+        ${(h.en&&h.en!==h.fr)?`<span class="hist-fr">(${h.fr})</span>`:''}
+        <span class="hist-time">${ago}</span>
+      </div>
+      <div class="hist-meta">CA ${h.ca} · DV ${h.dv} · ×${h.count}</div>
+      <div class="hist-actions">
+        <button class="add-btn" onclick="addFromHistory(${i})">+ Remettre en combat</button>
+        <button class="hist-del" onclick="deleteHistory(${i})">✕</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+function addFromHistory(i) {
+  const h = recentHistory[i];
+  const mIdx = MONSTERS.findIndex(m => m.fr===h.fr && m.ca===h.ca);
+  if(mIdx >= 0) openAddPopup(mIdx);
+}
+function deleteHistory(i) {
+  recentHistory.splice(i,1);
+  localStorage.setItem('toa_history', JSON.stringify(recentHistory));
+  renderHistory();
+}
+function clearHistory() {
+  recentHistory = [];
+  localStorage.setItem('toa_history', JSON.stringify(recentHistory));
+  renderHistory();
+}
+function timeAgo(ts) {
+  const diff = Date.now() - ts;
+  const m = Math.floor(diff/60000);
+  if(m < 1) return "À l'instant";
+  if(m < 60) return `Il y a ${m} min`;
+  const h = Math.floor(m/60);
+  if(h < 24) return `Il y a ${h}h`;
+  const d = Math.floor(h/24);
+  return `Il y a ${d}j`;
+}
+
+// ── SETTINGS / IMPORT ──
+function handleDragOver(e) { e.preventDefault(); document.getElementById('drop-zone').classList.add('drag-over'); }
+function handleDragLeave() { document.getElementById('drop-zone').classList.remove('drag-over'); }
+function handleDrop(e) {
+  e.preventDefault();
+  document.getElementById('drop-zone').classList.remove('drag-over');
+  processFiles(e.dataTransfer.files);
+}
+function handleFileInput(e) { processFiles(e.target.files); }
+function processFiles(files) {
+  let imported = 0;
+  Array.from(files).forEach(file => {
+    const reader = new FileReader();
+    reader.onload = ev => {
+      try {
+        let data = JSON.parse(ev.target.result);
+        if(!Array.isArray(data)) data = [data];
+        data.forEach(pc => {
+          if(pc.name) {
+            if(!pc.hpMax && pc.hp) pc.hpMax = pc.hp;
+            players.push(pc);
+            imported++;
+          }
+        });
+        savePlayers();
+        renderPCs();
+        renderPlayerList();
+        setStatus('import-status', `✔ ${imported} personnage(s) importé(s)`, 'ok');
+      } catch(err) {
+        setStatus('import-status', `✗ Erreur JSON dans ${file.name}: ${err.message}`, 'err');
+      }
+    };
+    reader.readAsText(file);
+  });
+}
+function setStatus(id, msg, type) {
+  const el = document.getElementById(id);
+  el.textContent = msg;
+  el.className = 'status-bar status-'+(type||'info');
+}
+// ── PLAYER DATA ──
+function savePlayers() { localStorage.setItem('toa_players', JSON.stringify(players)); }
+
+function clearAllPlayers() {
+  if(confirm('Supprimer tous les personnages ?')) {
+    players = [];
+    savePlayers();
+    renderPCs();
+    renderCharList();
+    setStatus('import-status', 'Liste effacée.', 'info');
+  }
+}
+
+function exportPlayersJSON() {
+  const blob = new Blob([JSON.stringify(players, null, 2)], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'toa_personnages.json';
+  a.click();
+}
+
+// ── CHARACTER LIST ──
+let selectedCharIdx = null;
+
+function renderCharList() {
+  const el = document.getElementById('char-list');
+  if(!players.length) {
+    el.innerHTML = '<div class="no-pc" style="font-size:.76rem;padding:.8rem;">Aucun personnage créé</div>';
+    renderPCs();
+    return;
+  }
+  el.innerHTML = players.map((pc,i) => `
+    <div class="char-list-card ${i===selectedCharIdx?'selected':''}" onclick="selectChar(${i})">
+      <div style="min-width:0;">
+        <div class="char-list-name">${pc.name||'Sans nom'}</div>
+        <div class="char-list-meta">${[pc.class,pc.race,pc.level?'Nv.'+pc.level:''].filter(Boolean).join(' · ')} · CA ${pc.ac||'?'} · PV ${pc.hpMax||'?'}</div>
+      </div>
+      <div class="char-list-actions">
+        <button class="char-add-combat" onclick="event.stopPropagation();addPlayerToCombat(${i})" title="Ajouter en combat">⚔</button>
+        <button class="char-list-edit" onclick="event.stopPropagation();openCharForm(${i})" title="Modifier">✏</button>
+        <button class="char-list-del" onclick="event.stopPropagation();deleteChar(${i})" title="Supprimer">✕</button>
+      </div>
+    </div>`).join('');
+  renderPCs();
+}
+
+function selectChar(i) {
+  selectedCharIdx = i;
+  openCharForm(i);
+  renderCharList();
+}
+
+function deleteChar(i) {
+  if(confirm('Supprimer ' + (players[i].name||'ce personnage') + ' ?')) {
+    players.splice(i,1);
+    if(selectedCharIdx === i) { selectedCharIdx = null; closeCharForm(); }
+    else if(selectedCharIdx > i) selectedCharIdx--;
+    savePlayers();
+    renderCharList();
+  }
+}
+
+// ── ADD PLAYER TO COMBAT ──
+let activePlayers = []; // [{pc, id, hpCurrent}] – players in combat scene
+
+function addPlayerToCombat(i) {
+  const pc = players[i];
+  const id = 'apc' + Date.now() + '_' + i;
+  activePlayers.push({ pc, id, hp: pc.hp || pc.hpMax || 0 });
+  renderCombatPlayers();
+}
+
+function removePlayerFromCombat(id) {
+  activePlayers = activePlayers.filter(e => e.id !== id);
+  renderCombatPlayers();
+}
+
+// ── ATTRIBUTE MODIFIER — ToA p.13 ──
+// 3-4→-3 · 5-6→-2 · 7-8→-1 · 9-12→0 · 13-14→+1 · 15-16→+2 · 17-18→+3 · 19-20→+4 · 21-22→+5
+function getGS(v) {
+  if(v <= 4)  return -3;
+  if(v <= 6)  return -2;
+  if(v <= 8)  return -1;
+  if(v <= 12) return  0;
+  if(v <= 14) return  1;
+  if(v <= 16) return  2;
+  if(v <= 18) return  3;
+  if(v <= 20) return  4;
+  if(v <= 22) return  5;
+  return 6;
+}
+
+// ── ROLL D20 vs ATTRIBUTE (ToA p.64) ──
+// GS = roll <= floor(attr/2) ; Success = roll <= attr ; TF = roll > floor(attr*1.5) or nat 20
+let rollTimeout = null;
+function rollAttr(pcName, attrLabel, attrVal) {
+  const d20 = rollDie(20);
+  const gs  = Math.floor(attrVal / 2);
+  const tf  = Math.floor(attrVal * 1.5);
+
+  let outcome, color, icon;
+  if(d20 === 20 || d20 > tf) {
+    outcome = 'Terrible Failure'; color = '#e74c3c'; icon = '💀';
+  } else if(d20 > attrVal) {
+    outcome = 'Échec'; color = 'rgba(200,100,100,.85)'; icon = '✗';
+  } else if(d20 <= gs) {
+    outcome = 'Great Success'; color = '#f0c040'; icon = '⭐';
+  } else {
+    outcome = 'Succès'; color = '#2ecc71'; icon = '✓';
+  }
+
+  let toast = document.getElementById('roll-toast');
+  if(!toast) {
+    toast = document.createElement('div');
+    toast.id = 'roll-toast';
+    toast.style.cssText = 'position:fixed;bottom:1.5rem;right:1.5rem;z-index:2000;background:linear-gradient(135deg,#2a1508,#1a0e05);border:2px solid var(--gold);border-radius:6px;padding:.9rem 1.2rem;font-family:Cinzel,serif;box-shadow:0 6px 30px rgba(0,0,0,.7);min-width:240px;transition:opacity .3s;';
+    document.body.appendChild(toast);
+  }
+  toast.style.borderColor = color;
+  toast.innerHTML = `
+    <div style="font-size:.58rem;color:rgba(200,169,110,.6);letter-spacing:.1em;margin-bottom:.4rem;">${pcName} — ${attrLabel} (${attrVal})</div>
+    <div style="display:flex;align-items:center;gap:.7rem;margin-bottom:.4rem;">
+      <span style="font-size:2rem;font-weight:900;color:${color};">${d20}</span>
+      <div>
+        <div style="font-size:.88rem;font-weight:700;color:${color};">${icon} ${outcome}</div>
+        <div style="font-size:.6rem;color:rgba(200,169,110,.55);margin-top:.1rem;">GS ≤${gs} · Succès ≤${attrVal} · TF >${tf}${d20===20?' (nat 20)':''}</div>
+      </div>
+    </div>`;
+  toast.style.opacity = '1';
+  clearTimeout(rollTimeout);
+  rollTimeout = setTimeout(() => { toast.style.opacity = '0'; }, 4000);
+}
+
+function renderCombatPlayers() {
+  const el = document.getElementById('combat-players');
+  if(!el) return;
+  if(!activePlayers.length) {
+    el.innerHTML = '<div class="no-pc" style="font-size:.74rem;">Aucun joueur en combat</div>';
+    return;
+  }
+  const attrKeys = ['S','D','C','I','P','W','Ch'];
+  const attrLabels = {S:'FOR',D:'DEX',C:'CON',I:'INT',P:'PER',W:'VOL',Ch:'CHA'};
+  el.innerHTML = activePlayers.map(e => {
+    const pc = e.pc;
+    const attrHtml = attrKeys.map(k => {
+      const v = pc.attrs&&pc.attrs[k] ? pc.attrs[k] : null;
+      if(!v) return `<div class="pc-attr pc-attr-inactive"><span class="pc-attr-n">${attrLabels[k]}</span><span class="pc-attr-v">—</span></div>`;
+      const gs = Math.floor(v/2);
+      return `<div class="pc-attr pc-attr-roll" onclick="rollAttr('${pc.name||'?'}','${attrLabels[k]}',${v})" title="Lancer 1d20 — GS≤${gs} / Succès≤${v}">
+        <span class="pc-attr-n">${attrLabels[k]}</span>
+        <span class="pc-attr-v">${v}</span>
+        <span class="pc-attr-mod">GS≤${gs}</span>
+      </div>`;
+    }).join('');
+    const skills = (pc.skills||[]).map(s=>`<span>${s}</span>`).join('');
+    return `<div class="pc-card">
+      <div class="pc-card-header">
+        <span class="pc-name">${pc.name||'Aventurier'}</span>
+        <div style="display:flex;align-items:center;gap:.4rem;">
+          <span class="pc-meta">${[pc.class,pc.race?'· '+pc.race:'',pc.level?'Nv.'+pc.level:''].filter(Boolean).join(' ')}</span>
+          <button class="ae-remove" onclick="removePlayerFromCombat('${e.id}')" title="Retirer">✕</button>
+        </div>
+      </div>
+      <div class="pc-attrs" style="margin-top:.35rem;">
+        <div class="pc-attr" style="background:var(--red2);border-color:var(--red);min-width:2.4rem;">
+          <span class="pc-attr-n">CA</span>
+          <span class="pc-attr-v" style="color:var(--gold3);font-size:1rem;">${pc.ac||10}</span>
+        </div>
+        ${attrHtml}
+      </div>
+      ${skills?`<div class="pc-skills">${skills}</div>`:''}
+    </div>`;
+  }).join('');
+}
+
+function updateCombatHP(id, val) {
+  const e = activePlayers.find(e => e.id === id);
+  if(!e) return;
+  e.hp = parseInt(val)||0;
+  const max = e.pc.hpMax || 1;
+  const pct = Math.max(0, Math.round((e.hp / max) * 100));
+  const bar = document.getElementById('apc-hp-bar-' + id);
+  const valEl = document.getElementById('apc-hp-val-' + id);
+  if(bar) { bar.style.width = pct+'%'; bar.className = 'hp-bar-fill '+(pct>60?'hp-ok':pct>30?'hp-mid':''); }
+  if(valEl) valEl.textContent = e.hp;
+}
+
+// ── CHARACTER FORM ──
+let editingWeapons = []; // [{name,hit,dmg}]
+
+function openCharForm(idx) {
+  selectedCharIdx = idx;
+  const pc = idx >= 0 ? players[idx] : null;
+  editingWeapons = pc ? JSON.parse(JSON.stringify(pc.weapons||[])) : [];
+  const col = document.getElementById('char-form-col');
+  const isNew = idx < 0;
+
+  function fv(field, def='') { return pc ? (pc[field]!==undefined ? pc[field] : def) : def; }
+  function fa(attr) { return pc&&pc.attrs ? (pc.attrs[attr]||'') : ''; }
+
+  col.innerHTML = `
+    <div class="cform-title">${isNew ? 'Nouveau Personnage' : 'Modifier — ' + (pc.name||'Sans nom')}</div>
+
+    <div class="cform-section">
+      <h4>Identité</h4>
+      <div class="cform-row">
+        <div class="cform-group grow"><span class="cform-label">Nom</span><input class="cform-input" id="cf-name" value="${fv('name')}" placeholder="Aldric"></div>
+        <div class="cform-group fixed-md"><span class="cform-label">Classe</span><input class="cform-input" id="cf-class" value="${fv('class')}" placeholder="Guerrier"></div>
+        <div class="cform-group fixed-md"><span class="cform-label">Race</span><input class="cform-input" id="cf-race" value="${fv('race')}" placeholder="Humain"></div>
+        <div class="cform-group fixed-sm"><span class="cform-label">Niveau</span><input class="cform-input" type="number" id="cf-level" value="${fv('level',1)}" min="1"></div>
+        <div class="cform-group fixed-sm"><span class="cform-label">CA</span><input class="cform-input" type="number" id="cf-ac" value="${fv('ac',10)}"></div>
+      </div>
+    </div>
+
+    <div class="cform-section">
+      <h4>Attributs <span style="font-size:.55rem;font-weight:400;color:rgba(200,169,110,.5);font-family:'EB Garamond',serif;">(cliquez en jeu pour lancer 1d20+mod)</span></h4>
+      <div class="cform-attrs">
+        ${[['S','Force'],['D','Dextérité'],['C','Constitution'],['I','Intelligence'],['P','Perception'],['W','Volonté'],['Ch','Charisme']].map(([k,lbl]) =>
+          `<div class="cform-group"><span class="cform-label">${lbl}</span><input class="cform-input" type="number" id="cf-attr-${k}" value="${fa(k)}" min="1" max="25" placeholder="—"></div>`
+        ).join('')}
+      </div>
+    </div>
+
+    <div class="cform-section">
+      <h4>Compétences \u0026 Capacités</h4>
+      <textarea class="skills-input" id="cf-skills" placeholder="Athlétisme, Mêlée, Discrétion…" rows="4">${fv('skills',[]).join(', ')}</textarea>
+    </div>
+
+    <div class="cform-section">
+      <h4>Notes</h4>
+      <textarea class="skills-input" id="cf-notes" placeholder="Traits, background, équipement…" rows="3">${fv('notes','')}</textarea>
+    </div>
+
+    <div class="cform-save-row">
+      <button class="cform-save-btn" onclick="saveCharForm(${idx})">💾 Enregistrer</button>
+      <button class="cform-cancel-btn" onclick="closeCharForm()">Annuler</button>
+    </div>`;
+
+  renderWeaponRows();
+}
+
+function renderWeaponRows() {
+  const el = document.getElementById('cf-weapons-list');
+  if(!el) return;
+  if(!editingWeapons.length) { el.innerHTML = ''; return; }
+  el.innerHTML = editingWeapons.map((w,i) => `
+    <div class="cform-wpn-row">
+      <div class="cform-group"><span class="cform-label">Nom</span><input class="cform-input" value="${w.name||''}" oninput="editingWeapons[${i}].name=this.value" placeholder="Épée"></div>
+      <div class="cform-group fixed-sm"><span class="cform-label">Touche</span><input class="cform-input" value="${w.hit||''}" oninput="editingWeapons[${i}].hit=this.value" placeholder="+3"></div>
+      <div class="cform-group fixed-sm"><span class="cform-label">Dégâts</span><input class="cform-input" value="${w.dmg||''}" oninput="editingWeapons[${i}].dmg=this.value" placeholder="1d8+2"></div>
+      <button class="wpn-remove" onclick="removeWeaponRow(${i})">✕</button>
+    </div>`).join('');
+}
+
+function addWeaponRow() {
+  editingWeapons.push({name:'',hit:'',dmg:''});
+  renderWeaponRows();
+}
+
+function removeWeaponRow(i) {
+  editingWeapons.splice(i,1);
+  renderWeaponRows();
+}
+
+function saveCharForm(idx) {
+  const name = document.getElementById('cf-name').value.trim();
+  if(!name) { alert('Le nom est obligatoire.'); return; }
+  const attrs = {};
+  ['S','D','C','I','P','W','Ch'].forEach(k => {
+    const v = parseInt(document.getElementById('cf-attr-'+k)?.value);
+    if(!isNaN(v) && v > 0) attrs[k] = v;
+  });
+  const skillsRaw = document.getElementById('cf-skills').value;
+  const skills = skillsRaw.split(',').map(s=>s.trim()).filter(Boolean);
+  const pc = {
+    name,
+    class: document.getElementById('cf-class').value.trim(),
+    race:  document.getElementById('cf-race').value.trim(),
+    level: parseInt(document.getElementById('cf-level').value)||1,
+    ac:    parseInt(document.getElementById('cf-ac').value)||10,
+    attrs,
+    skills,
+    notes: document.getElementById('cf-notes').value
+  };
+  if(idx >= 0) {
+    players[idx] = pc;
+  } else {
+    players.push(pc);
+    selectedCharIdx = players.length - 1;
+  }
+  savePlayers();
+  renderCharList();
+  openCharForm(selectedCharIdx); // re-render form with saved data
+}
+
+function closeCharForm() {
+  selectedCharIdx = null;
+  const col = document.getElementById('char-form-col');
+  col.innerHTML = '<div class="no-pc" style="padding:2.5rem 1rem;">Sélectionnez un personnage ou créez-en un nouveau</div>';
+  renderCharList();
+}
+
+// ── SCENE SUBTABS ──
+let sceneSubTab = 'combat';
+let combatHistory = JSON.parse(localStorage.getItem('toa_combat_history') || '[]');
+
+function showSceneSubTab(name) {
+  sceneSubTab = name;
+  document.querySelectorAll('.scene-sbt').forEach(b => b.classList.toggle('active', b.dataset.stab===name));
+  document.getElementById('scene-combat-view').style.display = name==='combat' ? '' : 'none';
+  document.getElementById('scene-history-view').style.display = name==='combat-history' ? 'flex' : 'none';
+  if(name==='combat-history') renderCombatHistory();
+}
+
+function updateEndCombatBtn() {
+  const btn = document.getElementById('end-combat-btn');
+  if(btn) btn.style.display = activeEnemies.length > 0 ? '' : 'none';
+}
+
+function endCombat() {
+  if(!activeEnemies.length) return;
+  if(!confirm('Terminer le combat ? Les créatures seront archivées dans l\'historique.')) return;
+
+  const now = Date.now();
+  const entry = {
+    id: 'ch' + now,
+    timestamp: now,
+    creatures: activeEnemies.map(e => ({
+      fr: e.m.fr,
+      en: e.m.en || e.m.fr,
+      ca: e.m.ca,
+      dv: e.m.dv,
+      count: e.count,
+      hpRolls: e.hpRolls || [],
+      allDead: e.hpRolls && e.hpRolls.length > 0 && e.hpRolls.every(hp => hp <= 0)
+    }))
+  };
+
+  combatHistory.unshift(entry);
+  if(combatHistory.length > 20) combatHistory = combatHistory.slice(0, 20);
+  localStorage.setItem('toa_combat_history', JSON.stringify(combatHistory));
+
+  // Clear enemies only, keep players
+  activeEnemies = [];
+  renderActiveEnemies();
+  updateEndCombatBtn();
+
+  // Switch to history to show result
+  showSceneSubTab('combat-history');
+}
+
+function renderCombatHistory() {
+  const el = document.getElementById('combat-history-list');
+  if(!el) return;
+  if(!combatHistory.length) {
+    el.innerHTML = '<div class="no-pc" style="padding:2rem;">Aucun combat archivé</div>';
+    return;
+  }
+  el.innerHTML = combatHistory.map((entry, i) => {
+    const date = new Date(entry.timestamp);
+    const dateStr = date.toLocaleDateString('fr-FR', {day:'2-digit',month:'2-digit',year:'numeric'}) +
+                    ' ' + date.toLocaleTimeString('fr-FR', {hour:'2-digit',minute:'2-digit'});
+    const totalCreatures = entry.creatures.reduce((s, c) => s + c.count, 0);
+    const tagsHtml = entry.creatures.map(c => {
+      const dead = c.allDead;
+      const hpInfo = c.hpRolls && c.hpRolls.length
+        ? ' · ' + c.hpRolls.map((hp,j) => `${dead?'☠':'♥'}${hp}`).join(' ')
+        : '';
+      return `<span class="combat-hist-tag ${dead?'dead':''}">${c.en||c.fr}${c.count>1?` ×${c.count}`:''}${hpInfo}</span>`;
+    }).join('');
+    return `<div class="combat-hist-card">
+      <div class="combat-hist-header">
+        <span class="combat-hist-title">⚔ Combat · ${totalCreatures} créature${totalCreatures>1?'s':''}</span>
+        <div style="display:flex;align-items:center;gap:.6rem;">
+          <span class="combat-hist-date">${dateStr}</span>
+          <button class="combat-hist-del" onclick="deleteCombatHistory(${i})">✕</button>
+        </div>
+      </div>
+      <div class="combat-hist-creatures">${tagsHtml}</div>
+    </div>`;
+  }).join('');
+}
+
+function deleteCombatHistory(i) {
+  combatHistory.splice(i, 1);
+  localStorage.setItem('toa_combat_history', JSON.stringify(combatHistory));
+  renderCombatHistory();
+}
+
+// ── INIT ──
+buildBFilters();
+renderBestiary();
+filterBestiary();
+renderPCs();
+renderCharList();
+</script>
+</body>
+</html>
